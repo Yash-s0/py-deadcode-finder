@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyDeadCodeFinder Report</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: slideDown 0.5s ease-out;
+}
+
+header h1 {
+    color: #333;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+header .timestamp {
+    color: #888;
+    font-size: 0.95em;
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #667eea;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn 0.6s ease-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+.card.empty {
+    background: #f8f9fa;
+    border-left-color: #ddd;
+    color: #666;
+    text-align: center;
+    padding: 40px;
+}
+
+.card h2 {
+    color: #333;
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.card h2::before {
+    content: "✓ ";
+    color: #667eea;
+    margin-right: 8px;
+}
+
+.file-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.file-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    font-size: 1.05em;
+}
+
+.file-name::before {
+    content: "📄 ";
+    margin-right: 8px;
+}
+
+.items-list {
+    display: grid;
+    gap: 8px;
+    margin-left: 15px;
+}
+
+.item {
+    background: white;
+    padding: 12px 15px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    border-left: 3px solid #764ba2;
+    transition: background 0.2s ease;
+}
+
+.item:hover {
+    background: #f0f0ff;
+}
+
+.item small {
+    color: #666;
+    font-size: 0.95em;
+}
+
+.item-line {
+    background: #667eea;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-right: 10px;
+    min-width: 60px;
+    text-align: center;
+}
+
+.item-text {
+    color: #333;
+    flex-grow: 1;
+}
+
+.toggle-container {
+    margin-top: 15px;
+}
+
+.toggle-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.toggle-btn:active {
+    transform: translateY(0);
+}
+
+.item-count {
+    background: #667eea;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.hidden-items {
+    display: none;
+    animation: slideDown 0.3s ease-out;
+}
+
+.hidden-items.show {
+    display: block;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border-top: 4px solid #667eea;
+}
+
+.summary-card h3 {
+    color: #667eea;
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+.summary-card p {
+    color: #666;
+    font-size: 0.95em;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.8em;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .card h2 {
+        font-size: 1.3em;
+    }
+}
+
+.footer {
+    text-align: center;
+    margin-top: 50px;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    color: #666;
+}
+
+.footer p {
+    margin: 5px 0;
+}
+
+.footer a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+.filter-controls {
+    margin-bottom: 25px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: white;
+    border: 2px solid #667eea;
+    color: #667eea;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.stats-bar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 2em;
+    font-weight: bold;
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+    display: block;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.issue-badge {
+    background: #ff6b6b;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.issue-badge.success {
+    background: #51cf66;
+}
+
+.no-issues-icon {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.search-box {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1em;
+    margin-bottom: 20px;
+    transition: border-color 0.3s ease;
+}
+
+.search-box:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.export-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.severity-critical {
+    border-left-color: #ff6b6b;
+}
+
+.severity-warning {
+    border-left-color: #ffa94d;
+}
+
+.severity-info {
+    border-left-color: #74c0fc;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+.copy-tooltip {
+    position: relative;
+    cursor: pointer;
+}
+
+.copy-tooltip:hover::after {
+    content: "Copied!";
+    position: absolute;
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    white-space: nowrap;
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 8px;
+}
+
+.sort-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.sort-btn {
+    background: #f0f0f0;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.sort-btn.active {
+    background: #667eea;
+    color: white;
+}
+
+.sort-btn:hover {
+    background: #e0e0e0;
+}
+
+.sort-btn.active:hover {
+    background: #764ba2;
+}
+
+.search-results {
+    background: #e8f4f8;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #667eea;
+}
+
+.dark-mode-toggle {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5em;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark-mode-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+body.dark-mode {
+    background: #1a1a2e;
+    color: #e0e0e0;
+}
+
+body.dark-mode .card {
+    background: #16213e;
+    color: #e0e0e0;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode header {
+    background: #0f3460;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .file-section {
+    background: #0f3460;
+}
+
+body.dark-mode .item {
+    background: #1a1a2e;
+}
+
+body.dark-mode .item:hover {
+    background: #2a2a4e;
+}
+
+body.dark-mode .search-box {
+    background: #0f3460;
+    border-color: #667eea;
+    color: #e0e0e0;
+}
+
+body.dark-mode .search-box::placeholder {
+    color: #999;
+}
+
+body.dark-mode .footer {
+    background: #0f3460;
+    color: #999;
+}
+
+body.dark-mode .stats-bar {
+    background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+}
+
+body.dark-mode .sort-btn {
+    background: #0f3460;
+    color: #e0e0e0;
+}
+
+body.dark-mode .sort-btn:hover {
+    background: #16213e;
+}
+
+.keyboard-hint {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    color: #667eea;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+}
+
+.keyboard-hint:hover {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.keyboard-shortcuts {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 2000;
+    display: none;
+}
+
+.keyboard-shortcuts.show {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+.keyboard-shortcuts h3 {
+    color: #667eea;
+    margin-top: 0;
+}
+
+.shortcut-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.shortcut-key {
+    background: #f0f0f0;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: 600;
+    color: #667eea;
+}
+
+.shortcut-desc {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.code-health-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.health-bar {
+    flex-grow: 1;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.health-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #51cf66 0%, #ffd93d 50%, #ff6b6b 100%);
+    transition: width 0.3s ease;
+}
+
+.health-label {
+    font-weight: 600;
+    color: #333;
+    min-width: 80px;
+}
+
+.copy-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+    background: #764ba2;
+    transform: scale(1.05);
+}
+
+.breadcrumb {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+.breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: #ccc;
+}
+
+.section-toggle {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: #667eea;
+    color: white;
+    border-radius: 4px;
+    text-align: center;
+    line-height: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-right: 8px;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.section-toggle:hover {
+    background: #764ba2;
+    transform: rotate(90deg);
+}
+
+@media print {
+    .dark-mode-toggle,
+    .keyboard-hint,
+    .export-btn,
+    .toggle-btn,
+    .search-box,
+    .sort-controls,
+    .filter-controls {
+        display: none;
+    }
+    
+    body {
+        background: white;
+        padding: 0;
+    }
+    
+    .card {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .hidden-items {
+        display: block !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .dark-mode-toggle {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.2em;
+    }
+    
+    .keyboard-hint {
+        display: none;
+    }
+    
+    .stats-bar {
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode (Press 'D')">🌙</button>
+<div class="keyboard-hint" id="keyboardHint" title="Press '?' for shortcuts">⌨️ Shortcuts</div>
+
+<div class="keyboard-shortcuts" id="keyboardShortcuts">
+    <h3>⌨️ Keyboard Shortcuts</h3>
+    <div class="shortcut-item">
+        <span class="shortcut-key">D</span>
+        <span class="shortcut-desc">Toggle Dark Mode</span>
+    </div>
+    <div class="shortcut-item">
+        <span class="shortcut-key">?</span>
+        <span class="shortcut-desc">Show This Help</span>
+    </div>
+    <div class="shortcut-item">
+        <span class="shortcut-key">Ctrl+F</span>
+        <span class="shortcut-desc">Search Items</span>
+    </div>
+    <div class="shortcut-item">
+        <span class="shortcut-key">Esc</span>
+        <span class="shortcut-desc">Close Help</span>
+    </div>
+    <div class="shortcut-item">
+        <span class="shortcut-key">/</span>
+        <span class="shortcut-desc">Focus Search</span>
+    </div>
+</div>
+
+<div class="container">
+    <header>
+        <h1>🔍 PyDeadCodeFinder Report</h1>
+        <div class="timestamp">Generated on <strong>{{ generated_at }}</strong></div>
+    </header>
+
+    <div class="card">
+        <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px;">
+            <input type="text" class="search-box" id="globalSearch" placeholder="🔍 Search all items... (Press '/' to focus)">
+            <button class="export-btn" onclick="exportToJSON()">📥 Export JSON</button>
+        </div>
+        <div id="searchResults" style="display: none;"></div>
+    </div>
+
+    <div class="card">
+        <h2>Code Health Indicator</h2>
+        {% set total_issues = (unused_imports|length) + (unused_functions|length) + (unused_classes|length) + (unused_variables|length) + (unreachable_code|length) %}
+        {# compute a raw health value then clamp it explicitly to 0..100 #}
+        {% set raw_health = 100 - (total_issues * 3) %}
+        {% if raw_health < 0 %}
+            {% set health_percentage = 0 %}
+        {% elif raw_health > 100 %}
+            {% set health_percentage = 100 %}
+        {% else %}
+            {% set health_percentage = raw_health %}
+        {% endif %}
+        {% if health_percentage >= 75 %}
+            {% set health_color = '#51cf66' %}
+        {% elif health_percentage >= 50 %}
+            {% set health_color = '#ffd93d' %}
+        {% else %}
+            {% set health_color = '#ff6b6b' %}
+        {% endif %}
+        <div class="code-health-indicator">
+            <span class="health-label">Health:</span>
+            <div class="health-bar">
+                <div class="health-fill" style="width: {{ health_percentage }}%"></div>
+            </div>
+            <span class="health-percentage" style="font-weight: 600; color: {{ health_color }};">{{ health_percentage }}%</span>
+        </div>
+        <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+            {% if health_percentage >= 75 %}
+            ✅ Excellent code health! Keep up the good work.
+            {% elif health_percentage >= 50 %}
+            ⚠️ Good, but there's room for improvement.
+            {% else %}
+            🚨 Consider reviewing and cleaning up dead code.
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Summary Overview</h2>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-value">{{ unused_imports|length }}</span>
+                <span class="stat-label">📁 Files with Unused Imports</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">{{ unused_functions|length }}</span>
+                <span class="stat-label">⚙️ Unused Functions</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">{{ unused_classes|length }}</span>
+                <span class="stat-label">🏗️ Unused Classes</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">{{ unused_variables|length }}</span>
+                <span class="stat-label">📊 Unused Variables</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">{{ unreachable_code|length }}</span>
+                <span class="stat-label">🚫 Files with Unreachable Code</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-header">
+            <h2>Quick Stats</h2>
+            <button class="export-btn" onclick="exportToJSON()">📥 Export Report</button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            {% set total_imports = [] %}
+            {% for file, items in unused_imports.items() %}
+                {% set _ = total_imports.append(items|length) %}
+            {% endfor %}
+            {% set total_imports_count = total_imports|sum %}
+            
+            {% set total_unreachable = [] %}
+            {% for file, blocks in unreachable_code.items() %}
+                {% set _ = total_unreachable.append(blocks|length) %}
+            {% endfor %}
+            {% set total_unreachable_count = total_unreachable|sum %}
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <h3 style="color: #667eea; margin: 0 0 10px;">{{ total_imports_count }}</h3>
+                <p style="color: #666; margin: 0;">Total Unused Imports</p>
+            </div>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <h3 style="color: #667eea; margin: 0 0 10px;">{{ (unused_functions|length) + (unused_classes|length) }}</h3>
+                <p style="color: #666; margin: 0;">Total Unused Functions & Classes</p>
+            </div>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <h3 style="color: #667eea; margin: 0 0 10px;">{{ total_unreachable_count }}</h3>
+                <p style="color: #666; margin: 0;">Total Unreachable Code Lines</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card {% if not unused_imports %}empty{% endif %}">
+        <div class="section-header">
+            <h2>Unused Imports</h2>
+            {% if unused_imports %}
+                <span class="issue-badge">{{ unused_imports|length }} files</span>
+            {% else %}
+                <span class="issue-badge success">✓ Clean</span>
+            {% endif %}
+        </div>
+        {% if unused_imports %}
+            {% set import_items = [] %}
+            {% for file, items in unused_imports.items() %}
+                {% set _ = import_items.append(items|length) %}
+            {% endfor %}
+            {% set total_imports = import_items|sum %}
+            
+            {% for file, items in unused_imports.items() %}
+                <div class="file-section {% if items|length > 20 %}severity-critical{% elif items|length > 10 %}severity-warning{% else %}severity-info{% endif %}">
+                    <div class="file-name">{{ file }} <span class="item-count">{{ items|length }}</span></div>
+                    <div class="items-list" id="imports-{{ loop.index }}">
+                        {% for imp, line in items[:10] %}
+                            <div class="item">
+                                <span class="item-line">Line {{ line }}</span>
+                                <span class="item-text">{{ imp }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if items|length > 10 %}
+                        <div class="toggle-container">
+                            <button class="toggle-btn" onclick="toggleItems('imports-{{ loop.index }}', this)">
+                                <span>+ View {{ items|length - 10 }} more</span>
+                            </button>
+                        </div>
+                        <div class="hidden-items" id="imports-{{ loop.index }}-hidden">
+                            {% for imp, line in items[10:] %}
+                                <div class="item">
+                                    <span class="item-line">Line {{ line }}</span>
+                                    <span class="item-text">{{ imp }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px;">
+                <div class="no-issues-icon">✅</div>
+                <p style="color: #666; font-size: 1.1em;">No unused imports found!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card {% if not unused_functions %}empty{% endif %}">
+        <div class="section-header">
+            <h2>Unused Functions</h2>
+            {% if unused_functions %}
+                <span class="issue-badge">{{ unused_functions|length }} found</span>
+            {% else %}
+                <span class="issue-badge success">✓ Clean</span>
+            {% endif %}
+        </div>
+        {% if unused_functions %}
+            <div class="items-list" id="functions-list">
+                {% for file, line, name in unused_functions[:10] %}
+                    <div class="item">
+                        <span class="item-line">Line {{ line }}</span>
+                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">({{ file }})</small></span>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if unused_functions|length > 10 %}
+                <div class="toggle-container">
+                    <button class="toggle-btn" onclick="toggleItems('functions-list', this)">
+                        <span>+ View {{ unused_functions|length - 10 }} more</span>
+                    </button>
+                </div>
+                <div class="hidden-items" id="functions-list-hidden">
+                    {% for file, line, name in unused_functions[10:] %}
+                        <div class="item">
+                            <span class="item-line">Line {{ line }}</span>
+                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">({{ file }})</small></span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div style="text-align: center; padding: 40px;">
+                <div class="no-issues-icon">✅</div>
+                <p style="color: #666; font-size: 1.1em;">No unused functions found!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card {% if not unused_classes %}empty{% endif %}">
+        <div class="section-header">
+            <h2>Unused Classes</h2>
+            {% if unused_classes %}
+                <span class="issue-badge">{{ unused_classes|length }} found</span>
+            {% else %}
+                <span class="issue-badge success">✓ Clean</span>
+            {% endif %}
+        </div>
+        {% if unused_classes %}
+            <div class="items-list" id="classes-list">
+                {% for file, line, name in unused_classes[:10] %}
+                    <div class="item">
+                        <span class="item-line">Line {{ line }}</span>
+                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">({{ file }})</small></span>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if unused_classes|length > 10 %}
+                <div class="toggle-container">
+                    <button class="toggle-btn" onclick="toggleItems('classes-list', this)">
+                        <span>+ View {{ unused_classes|length - 10 }} more</span>
+                    </button>
+                </div>
+                <div class="hidden-items" id="classes-list-hidden">
+                    {% for file, line, name in unused_classes[10:] %}
+                        <div class="item">
+                            <span class="item-line">Line {{ line }}</span>
+                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">({{ file }})</small></span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div style="text-align: center; padding: 40px;">
+                <div class="no-issues-icon">✅</div>
+                <p style="color: #666; font-size: 1.1em;">No unused classes found!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card {% if not unused_variables %}empty{% endif %}">
+        <div class="section-header">
+            <h2>Unused Variables</h2>
+            {% if unused_variables %}
+                <span class="issue-badge">{{ unused_variables|length }} files</span>
+            {% else %}
+                <span class="issue-badge success">✓ Clean</span>
+            {% endif %}
+        </div>
+        {% if unused_variables %}
+            {% for file, vars in unused_variables.items() %}
+                <div class="file-section severity-info">
+                    <div class="file-name">{{ file }} <span class="item-count">{{ vars|length }}</span></div>
+                    <div class="items-list" id="variables-{{ loop.index }}">
+                        {% for line, var in vars[:10] %}
+                            <div class="item">
+                                <span class="item-line">Line {{ line }}</span>
+                                <span class="item-text">{{ var }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if vars|length > 10 %}
+                        <div class="toggle-container">
+                            <button class="toggle-btn" onclick="toggleItems('variables-{{ loop.index }}', this)">
+                                <span>+ View {{ vars|length - 10 }} more</span>
+                            </button>
+                        </div>
+                        <div class="hidden-items" id="variables-{{ loop.index }}-hidden">
+                            {% for line, var in vars[10:] %}
+                                <div class="item">
+                                    <span class="item-line">Line {{ line }}</span>
+                                    <span class="item-text">{{ var }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px;">
+                <div class="no-issues-icon">✅</div>
+                <p style="color: #666; font-size: 1.1em;">No unused variables found!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card {% if not unreachable_code %}empty{% endif %}">
+        <div class="section-header">
+            <h2>Unreachable Code</h2>
+            {% if unreachable_code %}
+                <span class="issue-badge">{{ unreachable_code|length }} files</span>
+            {% else %}
+                <span class="issue-badge success">✓ Clean</span>
+            {% endif %}
+        </div>
+        {% if unreachable_code %}
+            {% for file, blocks in unreachable_code.items() %}
+                <div class="file-section severity-critical">
+                    <div class="file-name">{{ file }} <span class="item-count">{{ blocks|length }}</span></div>
+                    <div class="items-list" id="unreachable-{{ loop.index }}">
+                        {% for line, reason in blocks[:10] %}
+                            <div class="item">
+                                <span class="item-line">Line {{ line }}</span>
+                                <span class="item-text">{{ reason }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if blocks|length > 10 %}
+                        <div class="toggle-container">
+                            <button class="toggle-btn" onclick="toggleItems('unreachable-{{ loop.index }}', this)">
+                                <span>+ View {{ blocks|length - 10 }} more</span>
+                            </button>
+                        </div>
+                        <div class="hidden-items" id="unreachable-{{ loop.index }}-hidden">
+                            {% for line, reason in blocks[10:] %}
+                                <div class="item">
+                                    <span class="item-line">Line {{ line }}</span>
+                                    <span class="item-text">{{ reason }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px;">
+                <div class="no-issues-icon">✅</div>
+                <p style="color: #666; font-size: 1.1em;">No unreachable code found!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <p>📊 <strong>PyDeadCodeFinder Report</strong> - Detecting dead code in your Python projects</p>
+        <p>🚀 Report generated automatically by <a href="https://github.com/Yash-s0/py-deadcode-finder" target="_blank">PyDeadCodeFinder</a></p>
+        <p style="font-size: 0.9em; margin-top: 15px;">💡 Tip: Review each finding carefully. Some unused code might be part of your public API.</p>
+    </div>
+</div>
+
+<script>
+// Dark Mode Toggle
+const darkModeToggle = document.getElementById('darkModeToggle');
+const keyboardHint = document.getElementById('keyboardHint');
+const keyboardShortcuts = document.getElementById('keyboardShortcuts');
+const searchBox = document.getElementById('globalSearch');
+const searchResults = document.getElementById('searchResults');
+
+// Load dark mode preference
+if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
+    darkModeToggle.textContent = '☀️';
+}
+
+// Dark mode toggle functionality
+darkModeToggle.addEventListener('click', function() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDark);
+    darkModeToggle.textContent = isDark ? '☀️' : '🌙';
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Show shortcuts with ?
+    if (e.key === '?') {
+        keyboardShortcuts.classList.toggle('show');
+        e.preventDefault();
+    }
+    // Dark mode with D
+    if (e.key === 'd' || e.key === 'D') {
+        darkModeToggle.click();
+    }
+    // Close with Escape
+    if (e.key === 'Escape') {
+        keyboardShortcuts.classList.remove('show');
+    }
+    // Focus search with /
+    if (e.key === '/') {
+        searchBox.focus();
+        e.preventDefault();
+    }
+});
+
+keyboardHint.addEventListener('click', function() {
+    keyboardShortcuts.classList.toggle('show');
+});
+
+// Global search functionality
+searchBox.addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    
+    if (query.length === 0) {
+        searchResults.style.display = 'none';
+        document.querySelectorAll('.item').forEach(item => {
+            item.style.opacity = '1';
+            item.style.pointerEvents = 'auto';
+        });
+        return;
+    }
+    
+    const items = document.querySelectorAll('.item');
+    let matches = 0;
+    
+    items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(query)) {
+            item.style.opacity = '1';
+            item.style.pointerEvents = 'auto';
+            matches++;
+        } else {
+            item.style.opacity = '0.3';
+            item.style.pointerEvents = 'none';
+        }
+    });
+    
+    searchResults.style.display = 'block';
+    searchResults.innerHTML = `<strong>🔍 Found ${matches} matching items</strong>`;
+});
+
+function toggleItems(containerId, buttonElement) {
+    const container = document.getElementById(containerId);
+    const hiddenContainer = document.getElementById(containerId + '-hidden');
+    const isHidden = hiddenContainer.classList.contains('show');
+    
+    if (isHidden) {
+        hiddenContainer.classList.remove('show');
+        const count = hiddenContainer.children.length;
+        buttonElement.innerHTML = `<span>+ View ${count} more</span>`;
+    } else {
+        hiddenContainer.classList.add('show');
+        buttonElement.innerHTML = `<span>- View less</span>`;
+    }
+}
+
+function copyToClipboard(text, element) {
+    navigator.clipboard.writeText(text).then(function() {
+        const originalText = element.textContent;
+        element.textContent = '✓ Copied!';
+        setTimeout(function() {
+            element.textContent = originalText;
+        }, 2000);
+    });
+}
+
+function exportToJSON() {
+    const report = {
+        generated_at: '{{ generated_at }}',
+        summary: {
+            files_with_unused_imports: "{{ unused_imports|length }}",
+            unused_functions_count: "{{ unused_functions|length }}",
+            unused_classes_count: "{{ unused_classes|length }}",
+            unused_variables_count: "{{ unused_variables|length }}",
+            files_with_unreachable_code: "{{ unreachable_code|length }}"
+        },
+        report_generated: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(report, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'deadcode-report-' + new Date().toISOString().slice(0,10) + '.json';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+// Smooth scroll to top
+window.addEventListener('load', function() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+    
+    // Add copy on Ctrl+Click to items
+    document.querySelectorAll('.item-text').forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                copyToClipboard(this.textContent, this);
+            }
+        });
+    });
+});
+</script>
+
+</body>
+</html>
