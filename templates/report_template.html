@@ -812,7 +812,6 @@ body.dark-mode .sort-btn:hover {
     <div class="card">
         <h2>Code Health Indicator</h2>
         {% set total_issues = (unused_imports|length) + (unused_functions|length) + (unused_classes|length) + (unused_variables|length) + (unreachable_code|length) %}
-        {# compute a raw health value then clamp it explicitly to 0..100 #}
         {% set raw_health = 100 - (total_issues * 3) %}
         {% if raw_health < 0 %}
             {% set health_percentage = 0 %}
@@ -831,9 +830,12 @@ body.dark-mode .sort-btn:hover {
         <div class="code-health-indicator">
             <span class="health-label">Health:</span>
             <div class="health-bar">
-                <div class="health-fill" style="width: {{ health_percentage }}%"></div>
+                <div class="health-fill" style="width: '{{ health_percentage }}';"></div>
             </div>
-            <span class="health-percentage" style="font-weight: 600; color: {{ health_color }};">{{ health_percentage }}%</span>
+
+            <span class="health-percentage" style="font-weight: 600; color: '{% if health_color %}''{{ health_color }}''{% else %}#333{% endif %}';">
+                {{ health_percentage }}%
+            </span>
         </div>
         <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
             {% if health_percentage >= 75 %}
