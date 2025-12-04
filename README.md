@@ -20,6 +20,14 @@ A fast, local static analyzer that detects unused code in Python projects. No ex
 
 ---
 
+## ✅ Requirements
+
+- Python 3.8 or newer
+- Runs on Linux, macOS, and WSL (Windows) terminals
+- Recommended: a virtual environment (`python -m venv .venv && source .venv/bin/activate`)
+
+---
+
 ## 🚀 Installation
 
 ### Clone the repository
@@ -45,6 +53,16 @@ python cli.py /path/to/your/project
 ### Example
 ```bash
 python cli.py /home/user/my-python-project
+```
+
+### Custom Output Path
+```bash
+python cli.py /home/user/my-python-project --output reports/deadcode.html
+```
+
+### Try the bundled sample project
+```bash
+python cli.py examples/sample_project
 ```
 
 The tool will analyze your project and generate a beautiful HTML report named `deadcode_report.html` in the current directory.
@@ -91,6 +109,8 @@ The generated HTML report includes:
 - **View More/Less Toggle** - Sections with more than 10 items automatically collapse with "View More" buttons
 - **Beautiful UI** - Modern gradient design with smooth animations
 - **Responsive Design** - Works perfectly on desktop, tablet, and mobile
+- **Dark Mode Toggle** - Press `D` (or use the floating button) to switch themes; the preference persists and respects your OS default
+- **Keyboard Shortcuts** - Press `?` anywhere in the report to surface all hotkeys
 - **Export to JSON** - Download your report in JSON format for programmatic access
 - **Color-Coded Severity** - Visual indicators for issue severity
 - **Smooth Animations** - Professional transitions and interactions
@@ -105,6 +125,7 @@ The generated HTML report includes:
 - **Issue Badges** - Visual indicators for problem counts
 - **Hover Effects** - Interactive elements respond to user interaction
 - **Mobile Friendly** - Fully responsive design
+- **CSS Variables** - One stylesheet powers both light and dark modes, so custom theming is straightforward
 
 ---
 

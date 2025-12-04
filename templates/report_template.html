@@ -12,11 +12,57 @@
     box-sizing: border-box;
 }
 
+:root {
+    color-scheme: light;
+    --body-bg: radial-gradient(circle at 10% 20%, #f4f6ff 0%, #e1e8ff 45%, #dfe7ff 100%);
+    --text-primary: #1f2933;
+    --text-secondary: #4b5563;
+    --card-bg: #ffffff;
+    --card-muted-bg: #f5f7fb;
+    --border-subtle: #e5e7eb;
+    --shadow-soft: 0 12px 30px rgba(15, 23, 42, 0.12);
+    --shadow-strong: 0 18px 40px rgba(15, 23, 42, 0.18);
+    --accent: #667eea;
+    --accent-strong: #764ba2;
+    --accent-soft: rgba(102, 126, 234, 0.12);
+    --stat-bar-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --item-hover: rgba(102, 126, 234, 0.08);
+    --chip-contrast: #ffffff;
+    --issue-critical: #ff6b6b;
+    --issue-warning: #ffa94d;
+    --issue-info: #74c0fc;
+}
+
+body.dark-mode {
+    color-scheme: dark;
+    --body-bg: radial-gradient(circle at 15% 20%, #0b1734 0%, #050910 75%);
+    --text-primary: #e6edf7;
+    --text-secondary: #9fb0cc;
+    --card-bg: #0f1a2f;
+    --card-muted-bg: #0c1b33;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --shadow-soft: 0 22px 35px rgba(0, 0, 0, 0.55);
+    --shadow-strong: 0 32px 55px rgba(0, 0, 0, 0.7);
+    --accent: #8fb0ff;
+    --accent-strong: #c084fc;
+    --accent-soft: rgba(143, 176, 255, 0.22);
+    --stat-bar-bg: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+    --item-hover: rgba(143, 176, 255, 0.18);
+    --chip-contrast: #0f172a;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--body-bg);
     min-height: 100vh;
     padding: 40px 20px;
+    color: var(--text-primary);
+    line-height: 1.5;
+    transition: background 0.4s ease, color 0.4s ease;
+}
+
+a {
+    color: var(--accent);
 }
 
 .container {
@@ -25,23 +71,23 @@ body {
 }
 
 header {
-    background: white;
+    background: var(--card-bg);
     padding: 30px;
     border-radius: 15px;
     margin-bottom: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-soft);
     animation: slideDown 0.5s ease-out;
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
     gap: 30px;
+    border: 1px solid var(--border-subtle);
 }
 
 header h1 {
-    color: #333;
     font-size: 2.5em;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -50,7 +96,7 @@ header h1 {
 }
 
 header .timestamp {
-    color: #888;
+    color: var(--text-secondary);
     font-size: 0.95em;
     grid-column: 1;
     grid-row: 2;
@@ -64,62 +110,65 @@ header .section-header {
 }
 
 .card {
-    background: white;
+    background: var(--card-bg);
     padding: 30px;
     border-radius: 12px;
     margin-bottom: 25px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border-left: 5px solid #667eea;
+    box-shadow: var(--shadow-soft);
+    border-left: 5px solid var(--accent);
+    border: 1px solid var(--border-subtle);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     animation: fadeIn 0.6s ease-out;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-strong);
 }
 
 .card.empty {
-    background: #f8f9fa;
-    border-left-color: #ddd;
-    color: #666;
+    background: var(--card-muted-bg);
+    border-left-color: var(--border-subtle);
+    color: var(--text-secondary);
     text-align: center;
     padding: 40px;
 }
 
 .card h2 {
-    color: #333;
+    color: var(--text-primary);
     font-size: 1.8em;
     margin-bottom: 25px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid var(--border-subtle);
 }
 
 .card h2::before {
     content: "✓ ";
-    color: #667eea;
+    color: var(--accent);
     margin-right: 8px;
 }
 
 .file-section {
     margin-bottom: 25px;
     padding: 20px;
-    background: #f8f9fa;
+    background: var(--card-muted-bg);
     border-radius: 8px;
-    border-left: 4px solid #667eea;
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid var(--accent);
 }
 
 .file-name {
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 15px;
     display: flex;
     align-items: center;
     font-size: 1.05em;
+    gap: 10px;
 }
 
 .file-link {
-    color: #667eea;
+    color: var(--accent);
     text-decoration: none;
     display: inline-block;
     max-width: 85%;
@@ -127,11 +176,13 @@ header .section-header {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.file-link:hover { text-decoration: underline; }
+
+.file-link:hover {
+    text-decoration: underline;
+}
 
 .file-name::before {
     content: "📄 ";
-    margin-right: 8px;
 }
 
 .items-list {
@@ -141,27 +192,28 @@ header .section-header {
 }
 
 .item {
-    background: white;
+    background: var(--card-bg);
     padding: 12px 15px;
     border-radius: 6px;
     display: flex;
     align-items: center;
-    border-left: 3px solid #764ba2;
-    transition: background 0.2s ease;
+    border-left: 3px solid var(--accent-strong);
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .item:hover {
-    background: #f0f0ff;
+    background: var(--item-hover);
+    transform: translateX(2px);
 }
 
 .item small {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.95em;
 }
 
 .item-line {
-    background: #667eea;
-    color: white;
+    background: var(--accent);
+    color: var(--chip-contrast);
     padding: 3px 10px;
     border-radius: 4px;
     font-size: 0.85em;
@@ -172,7 +224,7 @@ header .section-header {
 }
 
 .item-text {
-    color: #333;
+    color: var(--text-primary);
     flex-grow: 1;
 }
 
@@ -181,8 +233,8 @@ header .section-header {
 }
 
 .toggle-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+    color: #fff;
     border: none;
     padding: 10px 20px;
     border-radius: 6px;
@@ -196,7 +248,7 @@ header .section-header {
 
 .toggle-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px var(--accent-soft);
 }
 
 .toggle-btn:active {
@@ -204,8 +256,8 @@ header .section-header {
 }
 
 .item-count {
-    background: #667eea;
-    color: white;
+    background: var(--accent);
+    color: var(--chip-contrast);
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 0.85em;
@@ -230,22 +282,22 @@ header .section-header {
 }
 
 .summary-card {
-    background: white;
+    background: var(--card-muted-bg);
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-subtle);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
     text-align: center;
-    border-top: 4px solid #667eea;
 }
 
 .summary-card h3 {
-    color: #667eea;
+    color: var(--accent);
     font-size: 2em;
     margin-bottom: 10px;
 }
 
 .summary-card p {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.95em;
 }
 
@@ -336,10 +388,9 @@ header .section-header {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
-
 .stats-bar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--stat-bar-bg);
+    color: #fff;
     padding: 20px 30px;
     border-radius: 12px;
     margin-bottom: 25px;
@@ -373,8 +424,8 @@ header .section-header {
 }
 
 .issue-badge {
-    background: #ff6b6b;
-    color: white;
+    background: var(--issue-critical);
+    color: #fff;
     padding: 5px 12px;
     border-radius: 20px;
     font-size: 0.85em;
@@ -388,27 +439,52 @@ header .section-header {
 .no-issues-icon {
     font-size: 3em;
     margin-bottom: 10px;
+    color: var(--accent);
+}
+
+.search-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .search-box {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #ddd;
+    border: 2px solid var(--border-subtle);
     border-radius: 8px;
     font-size: 1em;
-    margin-bottom: 20px;
-    transition: border-color 0.3s ease;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-box::placeholder {
+    color: var(--text-secondary);
 }
 
 .search-box:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.search-results {
+    background: var(--card-muted-bg);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent);
+    border: 1px solid var(--border-subtle);
+    display: none;
+}
+
+.search-results.show {
+    display: block;
 }
 
 .export-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+    color: #fff;
     border: none;
     padding: 12px 24px;
     border-radius: 8px;
@@ -422,25 +498,81 @@ header .section-header {
 
 .export-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px var(--accent-soft);
+}
+
+.filter-controls {
+    margin-bottom: 25px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: var(--card-bg);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+    color: #fff;
+    border-color: transparent;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--accent-soft);
+}
+
+.sort-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.sort-btn {
+    background: var(--card-muted-bg);
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.sort-btn.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+.sort-btn:hover {
+    background: var(--accent-soft);
 }
 
 .severity-critical {
-    border-left-color: #ff6b6b;
+    border-left-color: var(--issue-critical);
 }
 
 .severity-warning {
-    border-left-color: #ffa94d;
+    border-left-color: var(--issue-warning);
 }
 
 .severity-info {
-    border-left-color: #74c0fc;
+    border-left-color: var(--issue-info);
 }
 
 .progress-bar {
     width: 100%;
     height: 6px;
-    background: #e0e0e0;
+    background: var(--card-muted-bg);
     border-radius: 3px;
     overflow: hidden;
     margin-top: 10px;
@@ -448,7 +580,7 @@ header .section-header {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-strong) 100%);
     transition: width 0.3s ease;
 }
 
@@ -460,8 +592,8 @@ header .section-header {
 .copy-tooltip:hover::after {
     content: "Copied!";
     position: absolute;
-    background: #333;
-    color: white;
+    background: var(--card-bg);
+    color: var(--text-primary);
     padding: 5px 10px;
     border-radius: 4px;
     font-size: 0.85em;
@@ -469,51 +601,16 @@ header .section-header {
     bottom: 100%;
     left: 0;
     margin-bottom: 8px;
-}
-
-.sort-controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.sort-btn {
-    background: #f0f0f0;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: all 0.3s ease;
-}
-
-.sort-btn.active {
-    background: #667eea;
-    color: white;
-}
-
-.sort-btn:hover {
-    background: #e0e0e0;
-}
-
-.sort-btn.active:hover {
-    background: #764ba2;
-}
-
-.search-results {
-    background: #e8f4f8;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border-left: 4px solid #667eea;
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-soft);
 }
 
 .dark-mode-toggle {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+    color: #fff;
     border: none;
     width: 50px;
     height: 50px;
@@ -521,7 +618,7 @@ header .section-header {
     cursor: pointer;
     font-size: 1.5em;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px var(--accent-soft);
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -530,83 +627,26 @@ header .section-header {
 
 .dark-mode-toggle:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-}
-
-
-body.dark-mode {
-    background: #0f1724;
-    color: #f3f4f6;
-}
-
-body.dark-mode .card {
-    background: #081226;
-    color: #e6eef8;
-    box-shadow: 0 8px 35px rgba(0, 0, 0, 0.6);
-}
-
-body.dark-mode header {
-    background: #072043;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-}
-
-body.dark-mode .file-section {
-    background: #071a34;
-}
-
-body.dark-mode .item {
-    background: #071a2b;
-}
-
-body.dark-mode .item:hover {
-    background: #0b2a44;
-}
-
-body.dark-mode .search-box {
-    background: #071a34;
-    border-color: #2b6cff;
-    color: #e6eef8;
-}
-
-body.dark-mode .search-box::placeholder {
-    color: #999;
-}
-
-body.dark-mode .footer {
-    background: #0f3460;
-    color: #999;
-}
-
-body.dark-mode .stats-bar {
-    background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
-}
-
-body.dark-mode .sort-btn {
-    background: #0f3460;
-    color: #e0e0e0;
-}
-
-body.dark-mode .sort-btn:hover {
-    background: #16213e;
+    box-shadow: 0 6px 20px var(--accent-soft);
 }
 
 .keyboard-hint {
     position: fixed;
     top: 20px;
     right: 20px;
-    background: white;
+    background: var(--card-bg);
     padding: 10px 15px;
     border-radius: 6px;
     font-size: 0.85em;
-    color: #667eea;
+    color: var(--accent);
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-soft);
     z-index: 999;
 }
 
 .keyboard-hint:hover {
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: var(--shadow-strong);
 }
 
 .keyboard-shortcuts {
@@ -614,15 +654,16 @@ body.dark-mode .sort-btn:hover {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: white;
+    background: var(--card-bg);
     padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-strong);
     max-width: 400px;
     max-height: 80vh;
     overflow-y: auto;
     z-index: 2000;
     display: none;
+    border: 1px solid var(--border-subtle);
 }
 
 .keyboard-shortcuts.show {
@@ -631,7 +672,7 @@ body.dark-mode .sort-btn:hover {
 }
 
 .keyboard-shortcuts h3 {
-    color: #667eea;
+    color: var(--accent);
     margin-top: 0;
 }
 
@@ -639,20 +680,20 @@ body.dark-mode .sort-btn:hover {
     display: flex;
     justify-content: space-between;
     padding: 8px 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .shortcut-key {
-    background: #f0f0f0;
+    background: var(--card-muted-bg);
     padding: 3px 8px;
     border-radius: 4px;
     font-family: monospace;
     font-weight: 600;
-    color: #667eea;
+    color: var(--accent);
 }
 
 .shortcut-desc {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 0.9em;
 }
 
@@ -662,14 +703,15 @@ body.dark-mode .sort-btn:hover {
     gap: 10px;
     margin-top: 20px;
     padding: 15px;
-    background: #f8f9fa;
+    background: var(--card-muted-bg);
     border-radius: 8px;
+    border: 1px solid var(--border-subtle);
 }
 
 .health-bar {
     flex-grow: 1;
     height: 20px;
-    background: #e0e0e0;
+    background: var(--card-bg);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -681,13 +723,13 @@ body.dark-mode .sort-btn:hover {
 
 .health-label {
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
     min-width: 80px;
 }
 
 .copy-btn {
-    background: #667eea;
-    color: white;
+    background: var(--accent);
+    color: #fff;
     border: none;
     padding: 5px 10px;
     border-radius: 4px;
@@ -697,7 +739,7 @@ body.dark-mode .sort-btn:hover {
 }
 
 .copy-btn:hover {
-    background: #764ba2;
+    background: var(--accent-strong);
     transform: scale(1.05);
 }
 
@@ -706,30 +748,31 @@ body.dark-mode .sort-btn:hover {
     gap: 8px;
     margin-bottom: 20px;
     font-size: 0.9em;
+    color: var(--text-secondary);
 }
 
 .breadcrumb a {
-    color: #667eea;
+    color: var(--accent);
     text-decoration: none;
     cursor: pointer;
     transition: color 0.2s ease;
 }
 
 .breadcrumb a:hover {
-    color: #764ba2;
+    color: var(--accent-strong);
     text-decoration: underline;
 }
 
 .breadcrumb-separator {
-    color: #ccc;
+    color: var(--text-secondary);
 }
 
 .section-toggle {
     display: inline-block;
     width: 20px;
     height: 20px;
-    background: #667eea;
-    color: white;
+    background: var(--accent);
+    color: #fff;
     border-radius: 4px;
     text-align: center;
     line-height: 20px;
@@ -741,34 +784,71 @@ body.dark-mode .sort-btn:hover {
 }
 
 .section-toggle:hover {
-    background: #764ba2;
+    background: var(--accent-strong);
     transform: rotate(90deg);
 }
 
-@media print {
-    .dark-mode-toggle,
-    .keyboard-hint,
-    .export-btn,
-    .toggle-btn,
-    .search-box,
-    .sort-controls,
-    .filter-controls {
-        display: none;
+.footer {
+    text-align: center;
+    margin-top: 50px;
+    padding: 30px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow-soft);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+}
+
+.footer p {
+    margin: 5px 0;
+}
+
+.footer a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: var(--accent-strong);
+    text-decoration: underline;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
     }
-    
-    body {
-        background: white;
-        padding: 0;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
-    
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.8em;
+    }
+
     .card {
-        page-break-inside: avoid;
-        box-shadow: none;
-        border: 1px solid #ddd;
+        padding: 20px;
     }
-    
-    .hidden-items {
-        display: block !important;
+
+    .card h2 {
+        font-size: 1.3em;
+    }
+
+    .stats-bar {
+        flex-direction: column;
     }
 }
 
@@ -780,16 +860,42 @@ body.dark-mode .sort-btn:hover {
         height: 45px;
         font-size: 1.2em;
     }
-    
+
     .keyboard-hint {
         display: none;
     }
-    
-    .stats-bar {
-        flex-direction: column;
+}
+
+@media print {
+    .dark-mode-toggle,
+    .keyboard-hint,
+    .keyboard-shortcuts,
+    .export-btn,
+    .toggle-btn,
+    .search-box,
+    .sort-controls,
+    .filter-controls,
+    .search-results {
+        display: none !important;
+    }
+
+    body {
+        background: #fff;
+        padding: 0;
+    }
+
+    .card {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    .hidden-items {
+        display: block !important;
     }
 }
 </style>
+
 </head>
 
 <body>
@@ -848,7 +954,7 @@ body.dark-mode .sort-btn:hover {
             </div>
 
             <span class="health-percentage"
-                style="font-weight:600; color: {{ health_color | default('#ff6b6b') }};">
+                style="font-weight:600; color: '{{ health_color | default('#ff6b6b') }}'">
                 {{ health | default(0) | int }}%
             </span>
             <small style="display:block; margin-top:4px; color:#888;">
@@ -898,7 +1004,7 @@ body.dark-mode .sort-btn:hover {
             <h2>Quick Stats</h2>
             <button class="export-btn" onclick="exportToJSON()">📥 Export Report</button>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div class="summary-grid">
             {% set total_imports = [] %}
             {% for file, items in unused_imports.items() %}
                 {% set _ = total_imports.append(items|length) %}
@@ -911,17 +1017,17 @@ body.dark-mode .sort-btn:hover {
             {% endfor %}
             {% set total_unreachable_count = total_unreachable|sum %}
             
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <h3 style="color: #667eea; margin: 0 0 10px;">{{ total_imports_count }}</h3>
-                <p style="color: #666; margin: 0;">Total Unused Imports</p>
+            <div class="summary-card">
+                <h3>{{ total_imports_count }}</h3>
+                <p>Total Unused Imports</p>
             </div>
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <h3 style="color: #667eea; margin: 0 0 10px;">{{ (unused_functions|length) + (unused_classes|length) }}</h3>
-                <p style="color: #666; margin: 0;">Total Unused Functions & Classes</p>
+            <div class="summary-card">
+                <h3>{{ (unused_functions|length) + (unused_classes|length) }}</h3>
+                <p>Total Unused Functions & Classes</p>
             </div>
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <h3 style="color: #667eea; margin: 0 0 10px;">{{ total_unreachable_count }}</h3>
-                <p style="color: #666; margin: 0;">Total Unreachable Code Lines</p>
+            <div class="summary-card">
+                <h3>{{ total_unreachable_count }}</h3>
+                <p>Total Unreachable Code Lines</p>
             </div>
         </div>
     </div>
@@ -973,7 +1079,7 @@ body.dark-mode .sort-btn:hover {
         {% else %}
             <div style="text-align: center; padding: 40px;">
                 <div class="no-issues-icon">✅</div>
-                <p style="color: #666; font-size: 1.1em;">No unused imports found!</p>
+                <p style="color: var(--text-secondary); font-size: 1.1em;">No unused imports found!</p>
             </div>
         {% endif %}
     </div>
@@ -992,7 +1098,7 @@ body.dark-mode .sort-btn:hover {
                 {% for file, line, name in unused_functions[:10] %}
                     <div class="item">
                         <span class="item-line">Line {{ line }}</span>
-                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
                     </div>
                 {% endfor %}
             </div>
@@ -1006,7 +1112,7 @@ body.dark-mode .sort-btn:hover {
                     {% for file, line, name in unused_functions[10:] %}
                         <div class="item">
                             <span class="item-line">Line {{ line }}</span>
-                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
                         </div>
                     {% endfor %}
                 </div>
@@ -1014,7 +1120,7 @@ body.dark-mode .sort-btn:hover {
         {% else %}
             <div style="text-align: center; padding: 40px;">
                 <div class="no-issues-icon">✅</div>
-                <p style="color: #666; font-size: 1.1em;">No unused functions found!</p>
+                <p style="color: var(--text-secondary); font-size: 1.1em;">No unused functions found!</p>
             </div>
         {% endif %}
     </div>
@@ -1033,7 +1139,7 @@ body.dark-mode .sort-btn:hover {
                 {% for file, line, name in unused_classes[:10] %}
                     <div class="item">
                         <span class="item-line">Line {{ line }}</span>
-                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
                     </div>
                 {% endfor %}
             </div>
@@ -1047,7 +1153,7 @@ body.dark-mode .sort-btn:hover {
                     {% for file, line, name in unused_classes[10:] %}
                         <div class="item">
                             <span class="item-line">Line {{ line }}</span>
-                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
                         </div>
                     {% endfor %}
                 </div>
@@ -1055,7 +1161,7 @@ body.dark-mode .sort-btn:hover {
         {% else %}
             <div style="text-align: center; padding: 40px;">
                 <div class="no-issues-icon">✅</div>
-                <p style="color: #666; font-size: 1.1em;">No unused classes found!</p>
+                <p style="color: var(--text-secondary); font-size: 1.1em;">No unused classes found!</p>
             </div>
         {% endif %}
     </div>
@@ -1101,7 +1207,7 @@ body.dark-mode .sort-btn:hover {
         {% else %}
             <div style="text-align: center; padding: 40px;">
                 <div class="no-issues-icon">✅</div>
-                <p style="color: #666; font-size: 1.1em;">No unused variables found!</p>
+                <p style="color: var(--text-secondary); font-size: 1.1em;">No unused variables found!</p>
             </div>
         {% endif %}
     </div>
@@ -1147,7 +1253,7 @@ body.dark-mode .sort-btn:hover {
         {% else %}
             <div style="text-align: center; padding: 40px;">
                 <div class="no-issues-icon">✅</div>
-                <p style="color: #666; font-size: 1.1em;">No unreachable code found!</p>
+                <p style="color: var(--text-secondary); font-size: 1.1em;">No unreachable code found!</p>
             </div>
         {% endif %}
     </div>
@@ -1166,9 +1272,13 @@ const keyboardHint = document.getElementById('keyboardHint');
 const keyboardShortcuts = document.getElementById('keyboardShortcuts');
 const searchBox = document.getElementById('globalSearch');
 const searchResults = document.getElementById('searchResults');
+const searchEnabled = Boolean(searchBox && searchResults);
 
 // Load dark mode preference
-if (localStorage.getItem('darkMode') === 'true') {
+const storedTheme = localStorage.getItem('darkMode');
+const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+if (storedTheme === 'true' || (storedTheme === null && systemPrefersDark)) {
     document.body.classList.add('dark-mode');
     darkModeToggle.textContent = '☀️';
 }
@@ -1183,13 +1293,16 @@ darkModeToggle.addEventListener('click', function() {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
+    const tag = (e.target.tagName || '').toLowerCase();
+    const typing = e.target.isContentEditable || tag === 'input' || tag === 'textarea';
+
     // Show shortcuts with ?
-    if (e.key === '?') {
+    if (!typing && e.key === '?') {
         keyboardShortcuts.classList.toggle('show');
         e.preventDefault();
     }
     // Dark mode with D
-    if (e.key === 'd' || e.key === 'D') {
+    if (!typing && (e.key === 'd' || e.key === 'D')) {
         darkModeToggle.click();
     }
     // Close with Escape
@@ -1197,9 +1310,9 @@ document.addEventListener('keydown', function(e) {
         keyboardShortcuts.classList.remove('show');
     }
     // Focus search with /
-    if (e.key === '/') {
-        searchBox.focus();
+    if (searchEnabled && !typing && e.key === '/') {
         e.preventDefault();
+        searchBox.focus();
     }
 });
 
@@ -1208,36 +1321,48 @@ keyboardHint.addEventListener('click', function() {
 });
 
 // Global search functionality
-searchBox.addEventListener('input', function(e) {
-    const query = e.target.value.toLowerCase();
-    
-    if (query.length === 0) {
-        searchResults.style.display = 'none';
-        document.querySelectorAll('.item').forEach(item => {
+if (searchEnabled) {
+    const reportItems = Array.from(document.querySelectorAll('.item'));
+    const defaultMessage = searchResults.innerHTML;
+
+    const resetSearchState = () => {
+        searchResults.classList.remove('show');
+        searchResults.innerHTML = defaultMessage;
+        reportItems.forEach(item => {
             item.style.opacity = '1';
             item.style.pointerEvents = 'auto';
         });
-        return;
-    }
-    
-    const items = document.querySelectorAll('.item');
-    let matches = 0;
-    
-    items.forEach(item => {
-        const text = item.textContent.toLowerCase();
-        if (text.includes(query)) {
-            item.style.opacity = '1';
-            item.style.pointerEvents = 'auto';
-            matches++;
-        } else {
-            item.style.opacity = '0.3';
-            item.style.pointerEvents = 'none';
+    };
+
+    resetSearchState();
+
+    searchBox.addEventListener('input', function(e) {
+        const query = e.target.value.trim().toLowerCase();
+        
+        if (!query.length) {
+            resetSearchState();
+            return;
         }
+        
+        let matches = 0;
+        
+        reportItems.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            if (text.includes(query)) {
+                item.style.opacity = '1';
+                item.style.pointerEvents = 'auto';
+                matches++;
+            } else {
+                item.style.opacity = '0.3';
+                item.style.pointerEvents = 'none';
+            }
+        });
+        
+        const label = matches === 1 ? 'item' : 'items';
+        searchResults.classList.add('show');
+        searchResults.innerHTML = `<strong>🔍 Found ${matches} matching ${label}</strong>`;
     });
-    
-    searchResults.style.display = 'block';
-    searchResults.innerHTML = `<strong>🔍 Found ${matches} matching items</strong>`;
-});
+}
 
 function toggleItems(containerId, buttonElement) {
     const container = document.getElementById(containerId);
