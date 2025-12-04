@@ -38,12 +38,24 @@ class DeadCodeAnalyzer:
         visitor = DeadCodeVisitor()
         visitor.visit(tree)
 
-        if visitor.imports:
-            self.unused_imports[path] = visitor.imports
-
+        # Record used names from this file
         self.used_names.update(visitor.used_names)
-        self.function_defs.update(visitor.function_defs)
-        self.class_defs.update(visitor.class_defs)
+
+        # Process imports: keep only those not used in this file
+        unused = []
+        for imp, lineno in visitor.imports:
+            base = imp.split(".")[0]
+            if base not in visitor.used_names:
+                unused.append((imp, lineno))
+        if unused:
+            # store as string path for template friendliness
+            self.unused_imports[str(path)] = unused
+
+        # Store function/class definitions with the file path and lineno
+        for name, (nm, lineno) in visitor.function_defs.items():
+            self.function_defs[name] = (str(path), lineno)
+        for name, (nm, lineno) in visitor.class_defs.items():
+            self.class_defs[name] = (str(path), lineno)
 
         if visitor.unused_vars:
             self.unused_variables[path] = visitor.unused_vars

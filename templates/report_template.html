@@ -118,6 +118,17 @@ header .section-header {
     font-size: 1.05em;
 }
 
+.file-link {
+    color: #667eea;
+    text-decoration: none;
+    display: inline-block;
+    max-width: 85%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.file-link:hover { text-decoration: underline; }
+
 .file-name::before {
     content: "📄 ";
     margin-right: 8px;
@@ -933,7 +944,7 @@ body.dark-mode .sort-btn:hover {
             
             {% for file, items in unused_imports.items() %}
                 <div class="file-section {% if items|length > 20 %}severity-critical{% elif items|length > 10 %}severity-warning{% else %}severity-info{% endif %}">
-                    <div class="file-name">{{ file }} <span class="item-count">{{ items|length }}</span></div>
+                    <div class="file-name"><a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a> <span class="item-count">{{ items|length }}</span></div>
                     <div class="items-list" id="imports-{{ loop.index }}">
                         {% for imp, line in items[:10] %}
                             <div class="item">
@@ -981,7 +992,7 @@ body.dark-mode .sort-btn:hover {
                 {% for file, line, name in unused_functions[:10] %}
                     <div class="item">
                         <span class="item-line">Line {{ line }}</span>
-                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">({{ file }})</small></span>
+                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
                     </div>
                 {% endfor %}
             </div>
@@ -995,7 +1006,7 @@ body.dark-mode .sort-btn:hover {
                     {% for file, line, name in unused_functions[10:] %}
                         <div class="item">
                             <span class="item-line">Line {{ line }}</span>
-                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">({{ file }})</small></span>
+                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
                         </div>
                     {% endfor %}
                 </div>
@@ -1022,7 +1033,7 @@ body.dark-mode .sort-btn:hover {
                 {% for file, line, name in unused_classes[:10] %}
                     <div class="item">
                         <span class="item-line">Line {{ line }}</span>
-                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">({{ file }})</small></span>
+                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
                     </div>
                 {% endfor %}
             </div>
@@ -1036,7 +1047,7 @@ body.dark-mode .sort-btn:hover {
                     {% for file, line, name in unused_classes[10:] %}
                         <div class="item">
                             <span class="item-line">Line {{ line }}</span>
-                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">({{ file }})</small></span>
+                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: #999;">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
                         </div>
                     {% endfor %}
                 </div>
@@ -1061,7 +1072,7 @@ body.dark-mode .sort-btn:hover {
         {% if unused_variables %}
             {% for file, vars in unused_variables.items() %}
                 <div class="file-section severity-info">
-                    <div class="file-name">{{ file }} <span class="item-count">{{ vars|length }}</span></div>
+                    <div class="file-name"><a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a> <span class="item-count">{{ vars|length }}</span></div>
                     <div class="items-list" id="variables-{{ loop.index }}">
                         {% for line, var in vars[:10] %}
                             <div class="item">
@@ -1107,7 +1118,7 @@ body.dark-mode .sort-btn:hover {
         {% if unreachable_code %}
             {% for file, blocks in unreachable_code.items() %}
                 <div class="file-section severity-critical">
-                    <div class="file-name">{{ file }} <span class="item-count">{{ blocks|length }}</span></div>
+                    <div class="file-name"><a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a> <span class="item-count">{{ blocks|length }}</span></div>
                     <div class="items-list" id="unreachable-{{ loop.index }}">
                         {% for line, reason in blocks[:10] %}
                             <div class="item">
