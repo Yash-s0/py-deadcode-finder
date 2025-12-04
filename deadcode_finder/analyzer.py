@@ -1,7 +1,6 @@
 import ast
 from pathlib import Path
 from deadcode_finder.utils import read_file
-from deadcode_finder.call_graph import CallGraphBuilder
 
 
 class DeadCodeAnalyzer:

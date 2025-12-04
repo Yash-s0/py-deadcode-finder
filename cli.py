@@ -1,7 +1,6 @@
 import argparse
 from deadcode_finder.analyzer import DeadCodeAnalyzer
 from deadcode_finder.report import ReportGenerator
-from datetime import datetime
 
 def main():
     parser = argparse.ArgumentParser()
