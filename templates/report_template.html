@@ -665,8 +665,7 @@ body.dark-mode .sort-btn:hover {
 
 .health-fill {
     height: 100%;
-    background: linear-gradient(90deg, #51cf66 0%, #ffd93d 50%, #ff6b6b 100%);
-    transition: width 0.3s ease;
+    transition: width 0.3s ease, background 0.3s ease;
 }
 
 .health-label {
@@ -824,15 +823,20 @@ body.dark-mode .sort-btn:hover {
             <span class="health-label">Health:</span>
 
             <div class="health-bar">
-                <div class="health-fill"
-                    data-health="{{ health | default(0) | int }}"
-                    data-color="{{ health_color | default('#ff6b6b') }}">
-                </div>
+                {% set _h = (health | default(0) | int) %}
+                {% if _h < 50 %}
+                <div class="health-fill" style="width: {{ _h }}%; background-color: #ff6b6b; box-shadow: inset 0 0 6px rgba(0,0,0,0.06);"></div>
+                {% elif _h < 80 %}
+                <!-- Red -> Yellow gradient for medium health (50-79) -->
+                <div class="health-fill" style="width: {{ _h }}%; background: linear-gradient(90deg, #ff6b6b 0%, #ff6b6b 60%, #ffd93d 60%, #ffd93d 100%); box-shadow: inset 0 0 6px rgba(0,0,0,0.06);"></div>
+                {% else %}
+                <!-- Favor green for high health (>=80): red small, yellow small, then green majority -->
+                <div class="health-fill" style="width: {{ _h }}%; background: linear-gradient(90deg, #ff6b6b 0%, #ffd93d 20%, #51cf66 20%, #51cf66 100%); box-shadow: inset 0 0 6px rgba(0,0,0,0.06);"></div>
+                {% endif %}
             </div>
 
             <span class="health-percentage"
-                data-color="{{ health_color | default('#ff6b6b') }}"
-                style="font-weight:600;">
+                style="font-weight:600; color: {{ health_color | default('#ff6b6b') }};">
                 {{ health | default(0) | int }}%
             </span>
             <small style="display:block; margin-top:4px; color:#888;">
@@ -1291,31 +1295,7 @@ window.addEventListener('load', function() {
             }
         });
     });
-
-    // Initialize health bars (use data attributes to avoid inline quoting issues)
-    document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.health-fill').forEach(el => {
-        let health = el.dataset.health;  // use .dataset for cleaner access
-        
-        // Convert to number with fallback
-        health = parseInt(health, 10);
-        if (isNaN(health) || health < 0) health = 0;
-        if (health > 100) health = 100;
-
-        const color = el.dataset.color || '#ff6b6b';
-
-        el.style.width = health + '%';
-        el.style.backgroundColor = color;
-
-        // Update percentage text color
-        const pct = el.closest('.code-health-indicator')?.querySelector('.health-percentage');
-        if (pct) {
-            pct.style.color = color;
-            pct.textContent = health + '%';  // ensure it's correct even if Jinja failed
-        }
     });
-});
-});
 </script>
 
 </body>
