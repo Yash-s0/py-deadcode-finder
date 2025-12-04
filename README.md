@@ -1,229 +1,181 @@
-# PyDeadCodeFinder 🧹
+# PyDeadCodeFinder
 
-A fast, local static analyzer that detects unused code in Python projects. No external services, no configuration required. Just run it and get a beautiful, interactive HTML report.
-
-**Perfect for cleaning up dead code, optimizing imports, and maintaining code health! 🚀**
+PyDeadCodeFinder is an open-source static-analysis tool for identifying unused Python imports, functions, classes, variables, and unreachable code. It runs entirely on your machine and produces an interactive HTML report that summarizes the results and provides deep links back to the original files.
 
 ---
 
-## ✨ Features
+## Key Capabilities
 
-- 🔍 **Unused Imports Detection** - Find all unused imports across your project
-- ⚙️ **Unused Functions** - Identify functions that are never called
-- 🏗️ **Unused Classes** - Discover unused class definitions
-- 📊 **Unused Variables** - Find unused variable assignments
-- 🚫 **Unreachable Code** - Detect dead code after return statements
-- 📁 **Local Analysis** - No external services, everything runs on your machine
-- ⚡ **Lightning Fast** - Quickly analyzes your entire project
-- 🎨 **Beautiful Reports** - Interactive HTML reports with detailed statistics
-- 📥 **Export Functionality** - Export reports as JSON for further processing
+- Project-wide detection of unused imports, functions, classes, and variables.
+- Identification of unreachable code segments (for example, statements that follow a `return`).
+- Call-graph powered cross-file analysis to reduce false positives.
+- Modern HTML report with keyboard shortcuts, filtering, dark mode, and JSON export.
+- No external services, agents, or configuration files required.
 
 ---
 
-## ✅ Requirements
+## Requirements
 
 - Python 3.8 or newer
-- Runs on Linux, macOS, and WSL (Windows) terminals
-- Recommended: a virtual environment (`python -m venv .venv && source .venv/bin/activate`)
+- Linux, macOS, or Windows Subsystem for Linux
+- (Recommended) Virtual environment: `python -m venv .venv && source .venv/bin/activate`
 
 ---
 
-## 🚀 Installation
+## Installation
 
-### Clone the repository
+Clone the repository and install the dependencies:
+
 ```bash
 git clone https://github.com/Yash-s0/py-deadcode-finder
 cd py-deadcode-finder
-```
-
-### Install dependencies
-```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-## 📖 Usage
+## Usage
 
-### Basic Usage
+Analyze any Python codebase by pointing the CLI at its root directory:
+
 ```bash
-python cli.py /path/to/your/project
+python cli.py /path/to/project
 ```
 
-### Example
+Additional examples:
+
 ```bash
+# Explicit path
 python cli.py /home/user/my-python-project
-```
 
-### Custom Output Path
-```bash
+# Specify a custom output file
 python cli.py /home/user/my-python-project --output reports/deadcode.html
-```
 
-### Try the bundled sample project
-```bash
+# Run against the bundled sample project
 python cli.py examples/sample_project
 ```
 
-The tool will analyze your project and generate a beautiful HTML report named `deadcode_report.html` in the current directory.
+The command writes `deadcode_report.html` (or the file supplied via `--output`) to the current working directory.
 
 ---
 
-## 📊 Report Features
+## Report Overview
 
-The generated HTML report includes:
+### Summary dashboard
+- Overall “code health” indicator derived from the number of issues detected.
+- Counts of files containing unused imports, unused functions, unused classes, unused variables, and unreachable code.
 
-### 🎯 Summary Dashboard
-- Quick overview of all detected issues
-- Statistics for each category
-- Total count of problems found
+### Detailed sections
+1. **Unused Imports** – grouped by file path with per-import line numbers and severity badges.  
+2. **Unused Functions** – definitions that are not referenced anywhere in the analyzed project.  
+3. **Unused Classes** – class declarations that are never instantiated or referenced.  
+4. **Unused Variables** – variables assigned but never read, grouped by file.  
+5. **Unreachable Code** – code paths that cannot execute (for example, statements after a `return`).  
 
-### 📋 Detailed Sections
-
-1. **Unused Imports**
-   - Shows all unused import statements
-   - Grouped by file
-   - Line numbers for easy navigation
-   - Color-coded severity indicators
-
-2. **Unused Functions**
-   - Lists all detected unused functions
-   - File location and line numbers
-   - Quick reference for each function
-
-3. **Unused Classes**
-   - Classes that are defined but never instantiated
-   - Complete file paths and line numbers
-
-4. **Unused Variables**
-   - Variable assignments that are never used
-   - Grouped by file for organization
-
-5. **Unreachable Code**
-   - Code that cannot be executed
-   - Typically found after return statements
-   - Critical for code cleanup
-
-### 🎁 Interactive Features
-
-- **View More/Less Toggle** - Sections with more than 10 items automatically collapse with "View More" buttons
-- **Beautiful UI** - Modern gradient design with smooth animations
-- **Responsive Design** - Works perfectly on desktop, tablet, and mobile
-- **Dark Mode Toggle** - Press `D` (or use the floating button) to switch themes; the preference persists and respects your OS default
-- **Keyboard Shortcuts** - Press `?` anywhere in the report to surface all hotkeys
-- **Export to JSON** - Download your report in JSON format for programmatic access
-- **Color-Coded Severity** - Visual indicators for issue severity
-- **Smooth Animations** - Professional transitions and interactions
+### Interactive features
+- Keyboard shortcuts (`D` for dark mode, `/` to focus the search box, `?` for the shortcut overlay).
+- Responsive layout optimized for desktop and mobile displays.
+- Expand/collapse controls for sections with more than ten entries.
+- JSON export button for downstream processing.
 
 ---
 
-## 🎨 Report Design Highlights
+## Design Highlights
 
-- **Modern Gradient Theme** - Professional purple gradient background
-- **Card-Based Layout** - Clean, organized sections
-- **Summary Statistics** - Quick overview at a glance
-- **Issue Badges** - Visual indicators for problem counts
-- **Hover Effects** - Interactive elements respond to user interaction
-- **Mobile Friendly** - Fully responsive design
-- **CSS Variables** - One stylesheet powers both light and dark modes, so custom theming is straightforward
+- CSS variables power both light and dark themes for consistent theming and easy customization.
+- Card-based layout surfaces the most relevant statistics up front.
+- Severity colors highlight critical items at a glance.
+- All controls degrade gracefully when JavaScript is disabled.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 py-deadcode-finder/
 ├── cli.py                      # Command-line interface
 ├── deadcode_finder/
-│   ├── __init__.py
-│   ├── analyzer.py            # Main analysis engine
-│   ├── ast_parser.py          # AST parsing logic
-│   ├── call_graph.py          # Call graph analysis
-│   ├── report.py              # Report generation
-│   └── utils.py               # Utility functions
+│   ├── analyzer.py            # Core scanning logic
+│   ├── ast_parser.py          # AST parsing helpers
+│   ├── call_graph.py          # Call graph builder
+│   ├── report.py              # Template rendering
+│   └── utils.py               # Shared helpers
 ├── templates/
-│   └── report_template.html   # HTML report template
-├── requirements.txt           # Python dependencies
-└── README.md                  # This file
+│   └── report_template.html   # HTML/CSS template
+├── deadcode_report.html       # Example output
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
-## 🔍 How It Works
+## How It Works
 
-1. **AST Analysis** - Uses Python's Abstract Syntax Tree (AST) to understand code structure
-2. **Call Graph Building** - Builds a graph of function calls and class instantiations
-3. **Dead Code Detection** - Compares definitions with actual usage
-4. **Report Generation** - Creates a beautiful, interactive HTML report
-
----
-
-## ⚙️ Configuration
-
-No configuration needed! Just run the analyzer on your project directory and it will automatically detect all Python files.
-
-**Supported:**
-- Regular Python files (.py)
-- Multi-file projects
-- Nested directories
-- Local modules
+1. **File discovery** – walks the supplied directory, skipping common virtual-environment folders.
+2. **AST inspection** – parses each file with Python’s built-in `ast` module to capture imports, definitions, and references.
+3. **Call graph assembly** – correlates definitions with their usage across the project.
+4. **Issue classification** – determines which constructs are unused or unreachable.
+5. **Report rendering** – feeds the collected data to a Jinja2 template to produce the final HTML artifact.
 
 ---
 
-## 🎯 Use Cases
+## Configuration
 
-- **Code Cleanup** - Remove unused code to reduce technical debt
-- **Optimization** - Identify unnecessary imports and dependencies
-- **Refactoring** - Find dead code during refactoring sessions
-- **Code Review** - Use reports as part of code review process
-- **CI/CD Integration** - Run as part of your development pipeline
-- **Learning** - Understand code usage patterns in existing projects
+The CLI operates with sensible defaults:
 
----
+- Analyzes every `.py` file beneath the provided path.
+- Ignores directories named `env`, `.venv`, or `venv`, as well as `tests`.
+- Writes `deadcode_report.html` unless `--output` is provided.
 
-## 💡 Tips & Best Practices
-
-1. **Review Carefully** - Some unused code might be part of your public API
-2. **Run Regularly** - Include in your CI/CD pipeline
-3. **Export Reports** - Keep records of analysis over time
-4. **Share Reports** - Use HTML reports in code review discussions
-5. **Iterate** - Run multiple times as you clean up code
+No additional configuration files are necessary.
 
 ---
 
-## ⚠️ Important Notes
+## Use Cases
 
-- The tool performs **static analysis** and may have false positives
-- Code used via reflection or dynamic imports may appear unused
-- Always review findings before deleting code
-- Test thoroughly after removing flagged code
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest improvements
-- Submit pull requests
-- Share your feedback
+- Ongoing codebase hygiene and technical-debt reduction.
+- Refactoring support: confirm that moved or deprecated APIs are no longer referenced.
+- Pre-commit or CI gates that ensure unused artifacts are removed regularly.
+- Documentation of unused public APIs before major releases.
 
 ---
 
-## 📄 License
+## Operational Guidance
 
-This project is licensed under the MIT License. See LICENSE file for details.
-
----
-
-## 🙏 Acknowledgments
-
-Built with Python's AST module for powerful code analysis.
+1. **Review before deletion** – static analysis cannot detect every dynamic code path. Validate findings, especially for public APIs or reflection-heavy modules.
+2. **Automate the workflow** – schedule PyDeadCodeFinder in CI so newly introduced dead code is caught early.
+3. **Track progress** – export the JSON summary and trend issue counts over time.
+4. **Re-run tests** – after removing flagged items, run your test suite to ensure no behavioral regressions were introduced.
 
 ---
 
-## 📞 Support
+## Known Limitations
 
-For issues, questions, or suggestions, please create an issue on GitHub.
+- Dynamic imports, reflection, or runtime metaprogramming may lead to false positives.
+- Only Python files are analyzed. Mixed-language projects need separate tooling for other languages.
+- Extremely large repositories may benefit from future parallelization or caching improvements.
 
-**Happy code cleaning! 🎉**
+---
+
+## Contributing
+
+Contributions are welcome. Helpful areas include:
+
+- Reporting bugs or false positives through GitHub issues.
+- Improving documentation, examples, or onboarding instructions.
+- Enhancing the analyzer (new checks, better heuristics, performance optimizations).
+- Integrating the tool with CI pipelines or editor extensions.
+
+For substantial changes, please open an issue to discuss the approach before submitting a pull request.
+
+---
+
+## License
+
+PyDeadCodeFinder is distributed under the MIT License. See `LICENSE` for the full text.
+
+---
+
+## Support
+
+If you encounter a problem or have an enhancement request, open an issue on GitHub. Response times are best-effort based on maintainer availability.
