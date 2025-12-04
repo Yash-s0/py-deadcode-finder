@@ -1,4 +1,6 @@
 import argparse
+from datetime import datetime, timezone
+
 from deadcode_finder.analyzer import DeadCodeAnalyzer
 from deadcode_finder.report import ReportGenerator
 
@@ -52,6 +54,7 @@ def main():
     report["health"] = health
     report["health_color"] = color
     report["total_issues"] = total_issues
+    report["generated_at"] = datetime.now(timezone.utc).astimezone().strftime("%b %d, %Y %H:%M %Z")
 
     generator = ReportGenerator()
     generator.generate(args.output, report)
