@@ -197,6 +197,7 @@ header .section-header {
     border-radius: 6px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     border-left: 3px solid var(--accent-strong);
     transition: background 0.2s ease, transform 0.2s ease;
 }
@@ -204,6 +205,190 @@ header .section-header {
 .item:hover {
     background: var(--item-hover);
     transform: translateX(2px);
+}
+
+.item-content {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.item-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 10px;
+}
+
+.remove-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.remove-btn:hover {
+    background: linear-gradient(135deg, #ff5252, #e04454);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.remove-btn:active {
+    transform: translateY(0);
+}
+
+.remove-btn.removing {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.undo-btn {
+    background: linear-gradient(135deg, #4caf50, #45a049);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+
+.undo-btn:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-strong);
+    border-left: 4px solid var(--accent);
+    z-index: 3000;
+    animation: slideInRight 0.3s ease-out;
+    max-width: 400px;
+}
+
+.notification.success {
+    border-left-color: #4caf50;
+}
+
+.notification.error {
+    border-left-color: #ff6b6b;
+}
+
+.notification.info {
+    border-left-color: #74c0fc;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.server-status {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: var(--card-bg);
+    padding: 10px 15px;
+    border-radius: 6px;
+    box-shadow: var(--shadow-soft);
+    font-size: 0.85em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-subtle);
+    z-index: 999;
+}
+
+.server-status.online {
+    border-left: 4px solid #4caf50;
+}
+
+.server-status.offline {
+    border-left: 4px solid #ff6b6b;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.online {
+    background: #4caf50;
+}
+
+.status-indicator.offline {
+    background: #ff6b6b;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.batch-actions {
+    position: sticky;
+    top: 20px;
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 20px;
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    z-index: 100;
+}
+
+.batch-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.batch-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--accent-soft);
+}
+
+.batch-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .item small {
@@ -914,6 +1099,10 @@ header .section-header {
         <span class="shortcut-desc">Show This Help</span>
     </div>
     <div class="shortcut-item">
+        <span class="shortcut-key">Ctrl+Z</span>
+        <span class="shortcut-desc">Undo Last Removal</span>
+    </div>
+    <div class="shortcut-item">
         <span class="shortcut-key">Ctrl+F</span>
         <span class="shortcut-desc">Search Items</span>
     </div>
@@ -932,6 +1121,19 @@ header .section-header {
         <h1>🔍 PyDeadCodeFinder Report</h1>
         <div class="timestamp">Generated on <strong>{{ generated_at }}</strong></div>
     </header>
+
+    <!-- Server Status -->
+    {% if server_url %}
+    <div class="server-status online" id="serverStatus">
+        <span class="status-indicator online"></span>
+        <span>Removal Server Online</span>
+    </div>
+    {% else %}
+    <div class="server-status offline" id="serverStatus">
+        <span class="status-indicator offline"></span>
+        <span>Removal Server Offline - Start with server to enable removal</span>
+    </div>
+    {% endif %}
 
     <div class="card">
         <h2>Code Health Indicator</h2>
@@ -1053,9 +1255,18 @@ header .section-header {
                     <div class="file-name"><a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a> <span class="item-count">{{ items|length }}</span></div>
                     <div class="items-list" id="imports-{{ loop.index }}">
                         {% for imp, line in items[:10] %}
-                            <div class="item">
-                                <span class="item-line">Line {{ line }}</span>
-                                <span class="item-text">{{ imp }}</span>
+                            <div class="item" data-file="{{ file }}" data-line="{{ line }}" data-name="{{ imp }}" data-type="import">
+                                <div class="item-content">
+                                    <span class="item-line">Line {{ line }}</span>
+                                    <span class="item-text">{{ imp }}</span>
+                                </div>
+                                {% if server_url %}
+                                <div class="item-actions">
+                                    <button class="remove-btn" onclick="removeCode(this, 'import', '{{ file }}', '{{ imp }}', '{{ line }}')">
+                                        🗑️ Remove
+                                    </button>
+                                </div>
+                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>
@@ -1067,9 +1278,18 @@ header .section-header {
                         </div>
                         <div class="hidden-items" id="imports-{{ loop.index }}-hidden">
                             {% for imp, line in items[10:] %}
-                                <div class="item">
-                                    <span class="item-line">Line {{ line }}</span>
-                                    <span class="item-text">{{ imp }}</span>
+                                <div class="item" data-file="{{ file }}" data-line="{{ line }}" data-name="{{ imp }}" data-type="import">
+                                    <div class="item-content">
+                                        <span class="item-line">Line {{ line }}</span>
+                                        <span class="item-text">{{ imp }}</span>
+                                    </div>
+                                    {% if server_url %}
+                                    <div class="item-actions">
+                                        <button class="remove-btn" onclick="removeCode(this, 'import', '{{ file }}', '{{ imp }}', '{{ line }}')">
+                                            🗑️ Remove
+                                        </button>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             {% endfor %}
                         </div>
@@ -1096,9 +1316,18 @@ header .section-header {
         {% if unused_functions %}
             <div class="items-list" id="functions-list">
                 {% for file, line, name in unused_functions[:10] %}
-                    <div class="item">
-                        <span class="item-line">Line {{ line }}</span>
-                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                    <div class="item" data-file="{{ file }}" data-line="{{ line }}" data-name="{{ name }}" data-type="function">
+                        <div class="item-content">
+                            <span class="item-line">Line {{ line }}</span>
+                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                        </div>
+                        {% if server_url %}
+                        <div class="item-actions">
+                            <button class="remove-btn" onclick="removeCode(this, 'function', '{{ file }}', '{{ name }}', '{{ line }}')">
+                                🗑️ Remove
+                            </button>
+                        </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
@@ -1110,9 +1339,18 @@ header .section-header {
                 </div>
                 <div class="hidden-items" id="functions-list-hidden">
                     {% for file, line, name in unused_functions[10:] %}
-                        <div class="item">
-                            <span class="item-line">Line {{ line }}</span>
-                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                        <div class="item" data-file="{{ file }}" data-line="{{ line }}" data-name="{{ name }}" data-type="function">
+                            <div class="item-content">
+                                <span class="item-line">Line {{ line }}</span>
+                                <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                            </div>
+                            {% if server_url %}
+                            <div class="item-actions">
+                                <button class="remove-btn" onclick="removeCode(this, 'function', '{{ file }}', '{{ name }}', '{{ line }}')">
+                                    🗑️ Remove
+                                </button>
+                            </div>
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>
@@ -1137,9 +1375,18 @@ header .section-header {
         {% if unused_classes %}
             <div class="items-list" id="classes-list">
                 {% for file, line, name in unused_classes[:10] %}
-                    <div class="item">
-                        <span class="item-line">Line {{ line }}</span>
-                        <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                    <div class="item" data-file="{{ file }}" data-line="{{ line }}" data-name="{{ name }}" data-type="class">
+                        <div class="item-content">
+                            <span class="item-line">Line {{ line }}</span>
+                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                        </div>
+                        {% if server_url %}
+                        <div class="item-actions">
+                            <button class="remove-btn" onclick="removeCode(this, 'class', '{{ file }}', '{{ name }}', '{{ line }}')">
+                                🗑️ Remove
+                            </button>
+                        </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>
@@ -1151,9 +1398,18 @@ header .section-header {
                 </div>
                 <div class="hidden-items" id="classes-list-hidden">
                     {% for file, line, name in unused_classes[10:] %}
-                        <div class="item">
-                            <span class="item-line">Line {{ line }}</span>
-                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                        <div class="item" data-file="{{ file }}" data-line="{{ line }}" data-name="{{ name }}" data-type="class">
+                            <div class="item-content">
+                                <span class="item-line">Line {{ line }}</span>
+                                <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small></span>
+                            </div>
+                            {% if server_url %}
+                            <div class="item-actions">
+                                <button class="remove-btn" onclick="removeCode(this, 'class', '{{ file }}', '{{ name }}', '{{ line }}')">
+                                    🗑️ Remove
+                                </button>
+                            </div>
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>
@@ -1266,6 +1522,150 @@ header .section-header {
 </div>
 
 <script>
+// Server configuration
+const SERVER_URL = "{{ server_url }}";
+let removalHistory = [];
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideInRight 0.3s ease-out reverse';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Remove code function
+async function removeCode(button, type, file, name, line) {
+    if (!SERVER_URL) {
+        showNotification('Removal server is not running. Start the app with server enabled.', 'error');
+        return;
+    }
+    
+    if (!confirm(`Are you sure you want to remove this ${type}?\n\nFile: ${file}\nName: ${name}\nLine: ${line}`)) {
+        return;
+    }
+    
+    button.classList.add('removing');
+    button.disabled = true;
+    button.textContent = '⏳ Removing...';
+    
+    try {
+        const response = await fetch(SERVER_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: `remove_${type}`,
+                file: file,
+                name: name,
+                line: line
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            showNotification(`✓ Successfully removed ${type}: ${name}`, 'success');
+            
+            // Store in history
+            removalHistory.push({
+                type: type,
+                file: file,
+                name: name,
+                line: line,
+                backup: result.backup,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Remove the item from DOM
+            const item = button.closest('.item');
+            item.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                item.remove();
+                updateCounts();
+            }, 300);
+            
+        } else {
+            showNotification(`✗ Error: ${result.message}`, 'error');
+            button.classList.remove('removing');
+            button.disabled = false;
+            button.innerHTML = '🗑️ Remove';
+        }
+    } catch (error) {
+        showNotification(`✗ Network error: ${error.message}`, 'error');
+        button.classList.remove('removing');
+        button.disabled = false;
+        button.innerHTML = '🗑️ Remove';
+    }
+}
+
+// Update counts after removal
+function updateCounts() {
+    document.querySelectorAll('.file-section').forEach(section => {
+        const items = section.querySelectorAll('.item');
+        const count = items.length;
+        const countBadge = section.querySelector('.item-count');
+        if (countBadge) {
+            countBadge.textContent = count;
+        }
+        if (count === 0) {
+            section.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => section.remove(), 300);
+        }
+    });
+}
+
+// Undo last removal
+async function undoLastRemoval() {
+    if (removalHistory.length === 0) {
+        showNotification('No removals to undo', 'info');
+        return;
+    }
+    
+    const last = removalHistory[removalHistory.length - 1];
+    
+    try {
+        const response = await fetch(SERVER_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'restore',
+                backup: last.backup
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            showNotification(`✓ Restored ${last.type}: ${last.name}`, 'success');
+            removalHistory.pop();
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showNotification(`✗ Error: ${result.message}`, 'error');
+        }
+    } catch (error) {
+        showNotification(`✗ Network error: ${error.message}`, 'error');
+    }
+}
+
+// Add fadeOut animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(-20px); }
+    }
+`;
+document.head.appendChild(style);
+
 // Dark Mode Toggle
 const darkModeToggle = document.getElementById('darkModeToggle');
 const keyboardHint = document.getElementById('keyboardHint');
@@ -1296,19 +1696,28 @@ document.addEventListener('keydown', function(e) {
     const tag = (e.target.tagName || '').toLowerCase();
     const typing = e.target.isContentEditable || tag === 'input' || tag === 'textarea';
 
-    // Show shortcuts with ?
+    // D key toggles dark mode
+    if (!typing && (e.key === 'd' || e.key === 'D')) {
+        darkModeToggle.click();
+    }
+    
+    // ? key shows shortcuts
     if (!typing && e.key === '?') {
         keyboardShortcuts.classList.toggle('show');
         e.preventDefault();
     }
-    // Dark mode with D
-    if (!typing && (e.key === 'd' || e.key === 'D')) {
-        darkModeToggle.click();
-    }
-    // Close with Escape
+    
+    // Esc key closes shortcuts
     if (e.key === 'Escape') {
         keyboardShortcuts.classList.remove('show');
     }
+    
+    // Z key (with Ctrl/Cmd) for undo
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        undoLastRemoval();
+    }
+
     // Focus search with /
     if (searchEnabled && !typing && e.key === '/') {
         e.preventDefault();
@@ -1432,7 +1841,7 @@ window.addEventListener('load', function() {
             }
         });
     });
-    });
+});
 </script>
 
 </body>

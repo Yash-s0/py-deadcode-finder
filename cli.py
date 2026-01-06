@@ -3,16 +3,28 @@ from datetime import datetime, timezone
 
 from deadcode_finder.analyzer import DeadCodeAnalyzer
 from deadcode_finder.report import ReportGenerator
+from deadcode_finder.server import RemovalServer
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("path")
     parser.add_argument("--output", "-o", default="deadcode_report.html")
+    parser.add_argument("--port", "-p", type=int, default=8765, help="Port for removal server")
+    parser.add_argument("--no-server", action="store_true", help="Don't start removal server")
     args = parser.parse_args()
 
     print("[*] Scanning:", args.path)
     analyzer = DeadCodeAnalyzer(args.path)
     analyzer.scan()
+
+    # Start removal server
+    server = None
+    server_url = None
+    if not args.no_server:
+        server = RemovalServer(args.path, args.port)
+        server_url = server.start()
+        if server_url:
+            print(f"[+] Removal server started at {server_url}")
 
     report = analyzer.get_report()
     # === IMPROVED SCORING (much more realistic) ===
@@ -55,9 +67,23 @@ def main():
     report["health_color"] = color
     report["total_issues"] = total_issues
     report["generated_at"] = datetime.now(timezone.utc).astimezone().strftime("%b %d, %Y %H:%M %Z")
+    report["server_url"] = server_url if server_url else ""
 
     generator = ReportGenerator()
     generator.generate(args.output, report)
+    
+    if server and server.is_running():
+        print("[+] Server is running. Keep this terminal open to use removal features.")
+        print("[!] Press Ctrl+C to stop the server and exit.")
+        try:
+            # Keep the main thread alive while server runs
+            import time
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("\n[*] Shutting down server...")
+            server.stop()
+            print("[+] Server stopped.")
 
 if __name__ == "__main__":
     main()

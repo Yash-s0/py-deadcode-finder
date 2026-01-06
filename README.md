@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Dead code detection for Python projects with a polished, self-contained HTML report.  
+Dead code detection for Python projects with interactive removal capabilities.  
 [Features](#-features) • [Quick Start](#-quick-start) • [Usage](#usage) • [Report](#-report-features) • [Contributing](#-contributing) • [License](#-license)
 
 </div>
@@ -15,18 +15,32 @@ Dead code detection for Python projects with a polished, self-contained HTML rep
 
 ## ✨ Features
 
-### 🔎 Code Analysis
+### 🔎 Advanced Code Analysis
 - **Unused Imports** – file-scoped reports with line numbers.
-- **Unused Functions & Classes** – cross-project call graph ensures accuracy.
+- **Unused Functions & Classes** – cross-project call graph with smart detection.
+- **Decorator Detection** – recognizes decorated functions (e.g., @property, @staticmethod).
+- **Magic Method Recognition** – excludes __init__, __str__, and other special methods.
+- **Entry Point Detection** – identifies main(), test functions, and __main__ blocks.
 - **Unused Variables** – highlights assignments that are never read.
 - **Unreachable Code** – detects code after `return`, `raise`, or similar exits.
 - **Health Score** – single metric summarizing the overall findings.
 
-### 🎨 Report Experience
+### 🎨 Interactive Report
+- **One-Click Removal** – Remove dead code directly from the HTML report.
+- **Undo Functionality** – Revert removals with automatic backups (Ctrl+Z).
+- **Real-time Updates** – Watch counts update as you clean your code.
+- **Server Status** – Visual indicator showing removal server availability.
 - Responsive layout with light/dark themes and keyboard shortcuts.
 - Global search (`/`) with live filtering across every issue.
 - Collapsible sections for large result sets plus JSON export.
 - All CSS and JS inline—no external network calls.
+
+### 🛠️ Code Removal Features
+- **Safe Removal** – Automatic backups before any modification.
+- **Granular Control** – Remove individual imports, functions, or classes.
+- **Backup Management** – All backups stored in `.deadcode_backups/` folder.
+- **Confirmation Prompts** – Prevents accidental deletions.
+- **Visual Feedback** – Smooth animations and notifications for all actions.
 
 ---
 
@@ -47,8 +61,23 @@ pip install -r requirements.txt
 ### Basic run
 
 ```bash
+# Generate report only (no removal server)
+python cli.py /path/to/project --no-server
+
+# Generate report with interactive removal (default)
 python cli.py /path/to/project
+
+# Custom output file and port
+python cli.py /path/to/project --output my_report.html --port 8080
 ```
+
+The tool will:
+1. Scan your project for dead code
+2. Start a removal server (unless `--no-server` is specified)
+3. Generate an interactive HTML report
+4. Keep running to handle removal requests (press Ctrl+C to stop)
+
+**Important:** Keep the terminal running if you want to use the removal features in the HTML report.
 
 The command generates `deadcode_report.html` in the current directory.
 
