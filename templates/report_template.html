@@ -249,6 +249,28 @@ header .section-header {
     cursor: not-allowed;
 }
 
+.remove-btn.disabled,
+.remove-btn:disabled {
+    background: #9ca3af;
+    color: #f3f4f6;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.reason-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.75em;
+    background: rgba(255, 169, 77, 0.2);
+    border: 1px solid rgba(255, 169, 77, 0.5);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
 .undo-btn {
     background: linear-gradient(135deg, #4caf50, #45a049);
     color: white;
@@ -619,6 +641,11 @@ header .section-header {
 
 .issue-badge.success {
     background: #51cf66;
+}
+
+.issue-badge.warning {
+    background: var(--issue-warning);
+    color: #1f2933;
 }
 
 .no-issues-icon {
@@ -1135,6 +1162,55 @@ header .section-header {
     </div>
     {% endif %}
 
+    {% set high = high_confidence | default({}) %}
+    {% set potential = potentially_used | default({}) %}
+    {% set counts_ctx = counts | default({}) %}
+    {% set count_high = counts_ctx.get('high_confidence', {}) %}
+    {% set count_potential = counts_ctx.get('potentially_used', {}) %}
+
+    {% set unused_imports = high.get('unused_imports', unused_imports | default({})) %}
+    {% set unused_functions = high.get('unused_functions', unused_functions | default([])) %}
+    {% set unused_classes = high.get('unused_classes', unused_classes | default([])) %}
+    {% set unused_variables = high.get('unused_variables', unused_variables | default({})) %}
+
+    {% set potential_imports = potential.get('unused_imports', {}) %}
+    {% set potential_functions = potential.get('unused_functions', []) %}
+    {% set potential_classes = potential.get('unused_classes', []) %}
+    {% set potential_variables = potential.get('unused_variables', {}) %}
+
+    {% set high_import_items = [] %}
+    {% for file, items in unused_imports.items() %}
+        {% set _ = high_import_items.append(items|length) %}
+    {% endfor %}
+    {% set high_imports_total = count_high.get('imports', high_import_items|sum) %}
+
+    {% set high_variable_items = [] %}
+    {% for file, items in unused_variables.items() %}
+        {% set _ = high_variable_items.append(items|length) %}
+    {% endfor %}
+    {% set high_variables_total = count_high.get('variables', high_variable_items|sum) %}
+
+    {% set potential_import_items = [] %}
+    {% for file, items in potential_imports.items() %}
+        {% set _ = potential_import_items.append(items|length) %}
+    {% endfor %}
+    {% set potential_imports_total = count_potential.get('imports', potential_import_items|sum) %}
+
+    {% set potential_variable_items = [] %}
+    {% for file, items in potential_variables.items() %}
+        {% set _ = potential_variable_items.append(items|length) %}
+    {% endfor %}
+    {% set potential_variables_total = count_potential.get('variables', potential_variable_items|sum) %}
+
+    {% set high_total = count_high.get('total', high_imports_total + (unused_functions|length) + (unused_classes|length) + high_variables_total) %}
+    {% set potential_total = count_potential.get('total', potential_imports_total + (potential_functions|length) + (potential_classes|length) + potential_variables_total) %}
+
+    {% set total_unreachable = [] %}
+    {% for file, blocks in unreachable_code.items() %}
+        {% set _ = total_unreachable.append(blocks|length) %}
+    {% endfor %}
+    {% set total_unreachable_count = counts_ctx.get('unreachable', total_unreachable|sum) %}
+
     <div class="card">
         <h2>Code Health Indicator</h2>
 
@@ -1160,7 +1236,7 @@ header .section-header {
                 {{ health | default(0) | int }}%
             </span>
             <small style="display:block; margin-top:4px; color:#888;">
-                Based on {{ total_issues }} dead code issue{{ 's' if total_issues != 1 else '' }}
+                Based on {{ total_issues }} total finding{{ 's' if total_issues != 1 else '' }}
             </small>
         </div>
 
@@ -1179,24 +1255,16 @@ header .section-header {
         <h2>Summary Overview</h2>
         <div class="stats-bar">
             <div class="stat-item">
-                <span class="stat-value">{{ unused_imports|length }}</span>
-                <span class="stat-label">📁 Files with Unused Imports</span>
+                <span class="stat-value">{{ high_total }}</span>
+                <span class="stat-label">✅ High-confidence Unused</span>
             </div>
             <div class="stat-item">
-                <span class="stat-value">{{ unused_functions|length }}</span>
-                <span class="stat-label">⚙️ Unused Functions</span>
+                <span class="stat-value">{{ potential_total }}</span>
+                <span class="stat-label">⚠️ Potentially Used</span>
             </div>
             <div class="stat-item">
-                <span class="stat-value">{{ unused_classes|length }}</span>
-                <span class="stat-label">🏗️ Unused Classes</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-value">{{ unused_variables|length }}</span>
-                <span class="stat-label">📊 Unused Variables</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-value">{{ unreachable_code|length }}</span>
-                <span class="stat-label">🚫 Files with Unreachable Code</span>
+                <span class="stat-value">{{ total_unreachable_count }}</span>
+                <span class="stat-label">🚫 Unreachable Code Lines</span>
             </div>
         </div>
     </div>
@@ -1207,36 +1275,28 @@ header .section-header {
             <button class="export-btn" onclick="exportToJSON()">📥 Export Report</button>
         </div>
         <div class="summary-grid">
-            {% set total_imports = [] %}
-            {% for file, items in unused_imports.items() %}
-                {% set _ = total_imports.append(items|length) %}
-            {% endfor %}
-            {% set total_imports_count = total_imports|sum %}
-            
-            {% set total_unreachable = [] %}
-            {% for file, blocks in unreachable_code.items() %}
-                {% set _ = total_unreachable.append(blocks|length) %}
-            {% endfor %}
-            {% set total_unreachable_count = total_unreachable|sum %}
-            
             <div class="summary-card">
-                <h3>{{ total_imports_count }}</h3>
-                <p>Total Unused Imports</p>
+                <h3>{{ high_imports_total }}</h3>
+                <p>High-confidence Imports</p>
             </div>
             <div class="summary-card">
-                <h3>{{ (unused_functions|length) + (unused_classes|length) }}</h3>
-                <p>Total Unused Functions & Classes</p>
+                <h3>{{ (unused_functions|length) + (unused_classes|length) + high_variables_total }}</h3>
+                <p>High-confidence Symbols</p>
+            </div>
+            <div class="summary-card">
+                <h3>{{ potential_total }}</h3>
+                <p>Potentially Used Findings</p>
             </div>
             <div class="summary-card">
                 <h3>{{ total_unreachable_count }}</h3>
-                <p>Total Unreachable Code Lines</p>
+                <p>Unreachable Code Lines</p>
             </div>
         </div>
     </div>
 
     <div class="card {% if not unused_imports %}empty{% endif %}">
         <div class="section-header">
-            <h2>Unused Imports</h2>
+            <h2>High-confidence Unused Imports</h2>
             {% if unused_imports %}
                 <span class="issue-badge">{{ unused_imports|length }} files</span>
             {% else %}
@@ -1306,7 +1366,7 @@ header .section-header {
 
     <div class="card {% if not unused_functions %}empty{% endif %}">
         <div class="section-header">
-            <h2>Unused Functions</h2>
+            <h2>High-confidence Unused Functions</h2>
             {% if unused_functions %}
                 <span class="issue-badge">{{ unused_functions|length }} found</span>
             {% else %}
@@ -1365,7 +1425,7 @@ header .section-header {
 
     <div class="card {% if not unused_classes %}empty{% endif %}">
         <div class="section-header">
-            <h2>Unused Classes</h2>
+            <h2>High-confidence Unused Classes</h2>
             {% if unused_classes %}
                 <span class="issue-badge">{{ unused_classes|length }} found</span>
             {% else %}
@@ -1424,7 +1484,7 @@ header .section-header {
 
     <div class="card {% if not unused_variables %}empty{% endif %}">
         <div class="section-header">
-            <h2>Unused Variables</h2>
+            <h2>High-confidence Unused Variables</h2>
             {% if unused_variables %}
                 <span class="issue-badge">{{ unused_variables|length }} files</span>
             {% else %}
@@ -1464,6 +1524,210 @@ header .section-header {
             <div style="text-align: center; padding: 40px;">
                 <div class="no-issues-icon">✅</div>
                 <p style="color: var(--text-secondary); font-size: 1.1em;">No unused variables found!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card {% if not potential_imports %}empty{% endif %}">
+        <div class="section-header">
+            <h2>Potentially Used Imports</h2>
+            {% if potential_imports %}
+                <span class="issue-badge warning">{{ potential_imports|length }} files</span>
+            {% else %}
+                <span class="issue-badge success">✓ Clean</span>
+            {% endif %}
+        </div>
+        {% if potential_imports %}
+            {% for file, items in potential_imports.items() %}
+                <div class="file-section severity-warning">
+                    <div class="file-name"><a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a> <span class="item-count">{{ items|length }}</span></div>
+                    <div class="items-list" id="pimports-{{ loop.index }}">
+                        {% for imp, line, reason in items[:10] %}
+                            <div class="item">
+                                <div class="item-content">
+                                    <span class="item-line">Line {{ line }}</span>
+                                    <span class="item-text">{{ imp }} <span class="reason-badge">{{ reason }}</span></span>
+                                </div>
+                                <div class="item-actions">
+                                    <button class="remove-btn disabled" disabled title="Low-confidence finding">Review manually</button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if items|length > 10 %}
+                        <div class="toggle-container">
+                            <button class="toggle-btn" onclick="toggleItems('pimports-{{ loop.index }}', this)">
+                                <span>+ View {{ items|length - 10 }} more</span>
+                            </button>
+                        </div>
+                        <div class="hidden-items" id="pimports-{{ loop.index }}-hidden">
+                            {% for imp, line, reason in items[10:] %}
+                                <div class="item">
+                                    <div class="item-content">
+                                        <span class="item-line">Line {{ line }}</span>
+                                        <span class="item-text">{{ imp }} <span class="reason-badge">{{ reason }}</span></span>
+                                    </div>
+                                    <div class="item-actions">
+                                        <button class="remove-btn disabled" disabled title="Low-confidence finding">Review manually</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px;">
+                <div class="no-issues-icon">✅</div>
+                <p style="color: var(--text-secondary); font-size: 1.1em;">No potentially used imports found.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card {% if not potential_functions %}empty{% endif %}">
+        <div class="section-header">
+            <h2>Potentially Used Functions</h2>
+            {% if potential_functions %}
+                <span class="issue-badge warning">{{ potential_functions|length }} found</span>
+            {% else %}
+                <span class="issue-badge success">✓ Clean</span>
+            {% endif %}
+        </div>
+        {% if potential_functions %}
+            <div class="items-list" id="pfunctions-list">
+                {% for file, line, name, reason in potential_functions[:10] %}
+                    <div class="item">
+                        <div class="item-content">
+                            <span class="item-line">Line {{ line }}</span>
+                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small> <span class="reason-badge">{{ reason }}</span></span>
+                        </div>
+                        <div class="item-actions">
+                            <button class="remove-btn disabled" disabled title="Low-confidence finding">Review manually</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if potential_functions|length > 10 %}
+                <div class="toggle-container">
+                    <button class="toggle-btn" onclick="toggleItems('pfunctions-list', this)">
+                        <span>+ View {{ potential_functions|length - 10 }} more</span>
+                    </button>
+                </div>
+                <div class="hidden-items" id="pfunctions-list-hidden">
+                    {% for file, line, name, reason in potential_functions[10:] %}
+                        <div class="item">
+                            <div class="item-content">
+                                <span class="item-line">Line {{ line }}</span>
+                                <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small> <span class="reason-badge">{{ reason }}</span></span>
+                            </div>
+                            <div class="item-actions">
+                                <button class="remove-btn disabled" disabled title="Low-confidence finding">Review manually</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div style="text-align: center; padding: 40px;">
+                <div class="no-issues-icon">✅</div>
+                <p style="color: var(--text-secondary); font-size: 1.1em;">No potentially used functions found.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card {% if not potential_classes %}empty{% endif %}">
+        <div class="section-header">
+            <h2>Potentially Used Classes</h2>
+            {% if potential_classes %}
+                <span class="issue-badge warning">{{ potential_classes|length }} found</span>
+            {% else %}
+                <span class="issue-badge success">✓ Clean</span>
+            {% endif %}
+        </div>
+        {% if potential_classes %}
+            <div class="items-list" id="pclasses-list">
+                {% for file, line, name, reason in potential_classes[:10] %}
+                    <div class="item">
+                        <div class="item-content">
+                            <span class="item-line">Line {{ line }}</span>
+                            <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small> <span class="reason-badge">{{ reason }}</span></span>
+                        </div>
+                        <div class="item-actions">
+                            <button class="remove-btn disabled" disabled title="Low-confidence finding">Review manually</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if potential_classes|length > 10 %}
+                <div class="toggle-container">
+                    <button class="toggle-btn" onclick="toggleItems('pclasses-list', this)">
+                        <span>+ View {{ potential_classes|length - 10 }} more</span>
+                    </button>
+                </div>
+                <div class="hidden-items" id="pclasses-list-hidden">
+                    {% for file, line, name, reason in potential_classes[10:] %}
+                        <div class="item">
+                            <div class="item-content">
+                                <span class="item-line">Line {{ line }}</span>
+                                <span class="item-text"><strong>{{ name }}</strong> <small style="color: var(--text-secondary);">(<a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a>)</small> <span class="reason-badge">{{ reason }}</span></span>
+                            </div>
+                            <div class="item-actions">
+                                <button class="remove-btn disabled" disabled title="Low-confidence finding">Review manually</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div style="text-align: center; padding: 40px;">
+                <div class="no-issues-icon">✅</div>
+                <p style="color: var(--text-secondary); font-size: 1.1em;">No potentially used classes found.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card {% if not potential_variables %}empty{% endif %}">
+        <div class="section-header">
+            <h2>Potentially Used Variables</h2>
+            {% if potential_variables %}
+                <span class="issue-badge warning">{{ potential_variables|length }} files</span>
+            {% else %}
+                <span class="issue-badge success">✓ Clean</span>
+            {% endif %}
+        </div>
+        {% if potential_variables %}
+            {% for file, vars in potential_variables.items() %}
+                <div class="file-section severity-warning">
+                    <div class="file-name"><a class="file-link" href="file://{{ file }}" target="_blank">{{ file }}</a> <span class="item-count">{{ vars|length }}</span></div>
+                    <div class="items-list" id="pvariables-{{ loop.index }}">
+                        {% for line, var, reason in vars[:10] %}
+                            <div class="item">
+                                <span class="item-line">Line {{ line }}</span>
+                                <span class="item-text">{{ var }} <span class="reason-badge">{{ reason }}</span></span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if vars|length > 10 %}
+                        <div class="toggle-container">
+                            <button class="toggle-btn" onclick="toggleItems('pvariables-{{ loop.index }}', this)">
+                                <span>+ View {{ vars|length - 10 }} more</span>
+                            </button>
+                        </div>
+                        <div class="hidden-items" id="pvariables-{{ loop.index }}-hidden">
+                            {% for line, var, reason in vars[10:] %}
+                                <div class="item">
+                                    <span class="item-line">Line {{ line }}</span>
+                                    <span class="item-text">{{ var }} <span class="reason-badge">{{ reason }}</span></span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px;">
+                <div class="no-issues-icon">✅</div>
+                <p style="color: var(--text-secondary); font-size: 1.1em;">No potentially used variables found.</p>
             </div>
         {% endif %}
     </div>
@@ -1802,11 +2066,18 @@ function exportToJSON() {
     const report = {
         generated_at: '{{ generated_at }}',
         summary: {
-            files_with_unused_imports: "{{ unused_imports|length }}",
-            unused_functions_count: "{{ unused_functions|length }}",
-            unused_classes_count: "{{ unused_classes|length }}",
-            unused_variables_count: "{{ unused_variables|length }}",
-            files_with_unreachable_code: "{{ unreachable_code|length }}"
+            high_confidence_total: "{{ high_total }}",
+            potentially_used_total: "{{ potential_total }}",
+            high_confidence_imports: "{{ high_imports_total }}",
+            high_confidence_functions: "{{ unused_functions|length }}",
+            high_confidence_classes: "{{ unused_classes|length }}",
+            high_confidence_variables: "{{ high_variables_total }}",
+            potentially_used_imports: "{{ potential_imports_total }}",
+            potentially_used_functions: "{{ potential_functions|length }}",
+            potentially_used_classes: "{{ potential_classes|length }}",
+            potentially_used_variables: "{{ potential_variables_total }}",
+            unreachable_code_lines: "{{ total_unreachable_count }}",
+            total_findings: "{{ total_issues }}"
         },
         report_generated: new Date().toISOString()
     };

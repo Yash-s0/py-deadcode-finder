@@ -27,45 +27,67 @@ def main():
             print(f"[+] Removal server started at {server_url}")
 
     report = analyzer.get_report()
-    # === IMPROVED SCORING (much more realistic) ===
-    total_issues = sum([
-        len(report.get("unused_imports", [])),
-        len(report.get("unused_functions", [])),
-        len(report.get("unused_classes", [])),
-        len(report.get("unused_variables", [])),
-        len(report.get("unreachable_code", [])),
-    ])
+    counts = report.get("counts", {})
 
-    # New scoring: less punishing, more graduated
-    if total_issues == 0:
+    def _count_grouped_items(grouped):
+        if isinstance(grouped, dict):
+            return sum(len(items) for items in grouped.values())
+        if isinstance(grouped, list):
+            return len(grouped)
+        return 0
+
+    high_counts = counts.get("high_confidence", {})
+    potential_counts = counts.get("potentially_used", {})
+
+    high_total = int(high_counts.get("total", 0))
+    potential_total = int(potential_counts.get("total", 0))
+    unreachable_total = int(counts.get("unreachable", 0))
+
+    if not counts:
+        high_total = (
+            _count_grouped_items(report.get("unused_imports", {}))
+            + len(report.get("unused_functions", []))
+            + len(report.get("unused_classes", []))
+            + _count_grouped_items(report.get("unused_variables", {}))
+        )
+        potential_total = 0
+        unreachable_total = _count_grouped_items(report.get("unreachable_code", {}))
+
+    total_issues = int(counts.get("total_findings", high_total + potential_total + unreachable_total))
+
+    # Conservative scoring:
+    # high-confidence findings count fully; potentially-used findings are weighted lower.
+    weighted_issues = high_total + int(round(potential_total * 0.35)) + unreachable_total
+
+    if weighted_issues == 0:
         health = 100
-    elif total_issues <= 5:
-        health = 95
-    elif total_issues <= 15:
-        health = 85
-    elif total_issues <= 30:
-        health = 70
-    elif total_issues <= 60:
-        health = 50
-    elif total_issues <= 100:
-        health = 30
+    elif weighted_issues <= 5:
+        health = 96
+    elif weighted_issues <= 15:
+        health = 88
+    elif weighted_issues <= 30:
+        health = 75
+    elif weighted_issues <= 60:
+        health = 58
+    elif weighted_issues <= 100:
+        health = 40
     else:
-        health = max(5, 100 - total_issues)  # never go full 0, keep at least 5%
+        health = max(5, 100 - weighted_issues)
 
-    health = int(health)
-
-    # Color logic (same as before but slightly adjusted thresholds)
+    # Color logic
     if health >= 80:
         color = "#51cf66"  # green
     elif health >= 50:
         color = "#ffd93d"  # yellow
     else:
         color = "#ff6b6b"  # red
-    # ================================================
 
     report["health"] = health
     report["health_color"] = color
     report["total_issues"] = total_issues
+    report["high_confidence_total"] = high_total
+    report["potentially_used_total"] = potential_total
+    report["unreachable_total"] = unreachable_total
     report["generated_at"] = datetime.now(timezone.utc).astimezone().strftime("%b %d, %Y %H:%M %Z")
     report["server_url"] = server_url if server_url else ""
 

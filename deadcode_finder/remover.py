@@ -71,7 +71,6 @@ class CodeRemover:
         try:
             # Ensure line_number is an integer
             line_number = int(line_number)
-            backup = self.backup_file(file_path)
             
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -79,34 +78,46 @@ class CodeRemover:
             tree = ast.parse(content)
             lines = content.splitlines(keepends=True)
             
-            # Find the function node
+            target_node = None
+            # Match both function name and exact definition line
             for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef) and node.name == function_name:
-                    if hasattr(node, 'lineno') and hasattr(node, 'end_lineno'):
-                        start_line = node.lineno - 1
-                        end_line = node.end_lineno
-                        
-                        removed_code = ''.join(lines[start_line:end_line])
-                        
-                        # Remove the function
-                        del lines[start_line:end_line]
-                        
-                        with open(file_path, 'w', encoding='utf-8') as f:
-                            f.writelines(lines)
-                        
-                        change = {
-                            'status': 'success',
-                            'file': file_path,
-                            'line': line_number,
-                            'type': 'function',
-                            'name': function_name,
-                            'removed': removed_code[:200] + '...' if len(removed_code) > 200 else removed_code,
-                            'backup': backup
-                        }
-                        self.changes_log.append(change)
-                        return change
-            
-            return {'status': 'error', 'message': f'Function {function_name} not found'}
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    if node.name == function_name and getattr(node, 'lineno', None) == line_number:
+                        target_node = node
+                        break
+
+            if not target_node:
+                return {
+                    'status': 'error',
+                    'message': f'Function {function_name} at line {line_number} not found'
+                }
+
+            if not (hasattr(target_node, 'lineno') and hasattr(target_node, 'end_lineno')):
+                return {'status': 'error', 'message': 'Could not determine function boundaries'}
+
+            backup = self.backup_file(file_path)
+
+            start_line = target_node.lineno - 1
+            end_line = target_node.end_lineno
+            removed_code = ''.join(lines[start_line:end_line])
+
+            # Remove the function
+            del lines[start_line:end_line]
+
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.writelines(lines)
+
+            change = {
+                'status': 'success',
+                'file': file_path,
+                'line': line_number,
+                'type': 'function',
+                'name': function_name,
+                'removed': removed_code[:200] + '...' if len(removed_code) > 200 else removed_code,
+                'backup': backup
+            }
+            self.changes_log.append(change)
+            return change
         
         except Exception as e:
             return {'status': 'error', 'message': str(e)}
@@ -116,7 +127,6 @@ class CodeRemover:
         try:
             # Ensure line_number is an integer
             line_number = int(line_number)
-            backup = self.backup_file(file_path)
             
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -124,34 +134,46 @@ class CodeRemover:
             tree = ast.parse(content)
             lines = content.splitlines(keepends=True)
             
-            # Find the class node
+            target_node = None
+            # Match both class name and exact definition line
             for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef) and node.name == class_name:
-                    if hasattr(node, 'lineno') and hasattr(node, 'end_lineno'):
-                        start_line = node.lineno - 1
-                        end_line = node.end_lineno
-                        
-                        removed_code = ''.join(lines[start_line:end_line])
-                        
-                        # Remove the class
-                        del lines[start_line:end_line]
-                        
-                        with open(file_path, 'w', encoding='utf-8') as f:
-                            f.writelines(lines)
-                        
-                        change = {
-                            'status': 'success',
-                            'file': file_path,
-                            'line': line_number,
-                            'type': 'class',
-                            'name': class_name,
-                            'removed': removed_code[:200] + '...' if len(removed_code) > 200 else removed_code,
-                            'backup': backup
-                        }
-                        self.changes_log.append(change)
-                        return change
-            
-            return {'status': 'error', 'message': f'Class {class_name} not found'}
+                if isinstance(node, ast.ClassDef):
+                    if node.name == class_name and getattr(node, 'lineno', None) == line_number:
+                        target_node = node
+                        break
+
+            if not target_node:
+                return {
+                    'status': 'error',
+                    'message': f'Class {class_name} at line {line_number} not found'
+                }
+
+            if not (hasattr(target_node, 'lineno') and hasattr(target_node, 'end_lineno')):
+                return {'status': 'error', 'message': 'Could not determine class boundaries'}
+
+            backup = self.backup_file(file_path)
+
+            start_line = target_node.lineno - 1
+            end_line = target_node.end_lineno
+            removed_code = ''.join(lines[start_line:end_line])
+
+            # Remove the class
+            del lines[start_line:end_line]
+
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.writelines(lines)
+
+            change = {
+                'status': 'success',
+                'file': file_path,
+                'line': line_number,
+                'type': 'class',
+                'name': class_name,
+                'removed': removed_code[:200] + '...' if len(removed_code) > 200 else removed_code,
+                'backup': backup
+            }
+            self.changes_log.append(change)
+            return change
         
         except Exception as e:
             return {'status': 'error', 'message': str(e)}
